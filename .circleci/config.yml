@@ -17,7 +17,6 @@ jobs:
 
     steps:
       - checkout
-      - setup_remote_docker
 
       - restore_cache:
           keys:
@@ -28,12 +27,14 @@ jobs:
       # run tests!
       - run: gradle test
 
-      - run: |
-          docker build -t adeln/youtube .
-          docker login -u $DOCKER_USER -p $DOCKER_PASS
-          docker push adeln/youtube
-
       - save_cache:
           paths:
             - ~/.m2
           key: v1-dependencies-{{ checksum "build.gradle" }}
+
+      - setup_remote_docker
+
+      - run: |
+          docker build -t adeln/youtube .
+          docker login -u $DOCKER_USER -p $DOCKER_PASS
+          docker push adeln/youtube
