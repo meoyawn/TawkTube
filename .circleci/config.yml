@@ -2,34 +2,12 @@ version: 2
 jobs:
   build:
     docker:
-      - image: circleci/openjdk:8-jdk
+      - image: docker
 
     working_directory: ~/repo
 
-    environment:
-      # Customize the JVM maximum heap limit
-      JVM_OPTS: -Xmx3200m
-      TERM: dumb
-
     steps:
       - checkout
-
-      - restore_cache:
-          keys:
-          - v1-dependencies-{{ checksum "build.gradle" }}
-          # fallback to using the latest cache if no exact match is found
-          - v1-dependencies-
-
-      # run tests!
-      - run: gradle test
-
-      - save_cache:
-          paths:
-            - ~/.m2
-            - ~/.gradle
-          key: v1-dependencies-{{ checksum "build.gradle" }}
-
-      - setup_remote_docker
 
       - run: |
           docker build -t adeln/youtube .
