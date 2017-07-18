@@ -61,7 +61,6 @@ fun entry(client: OkHttpClient, video: PlaylistItemSnippet): SyndEntry? =
                 EntryInformationImpl().also {
                     it.image = URL(thumbnail(video).url)
                     it.duration = Duration(audio.lengthMillis())
-                    it.order = video.position.toInt()
                 },
                 MediaEntryModuleImpl().also {
                     it.mediaContents = arrayOf(
