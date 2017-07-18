@@ -10,6 +10,7 @@ jobs:
       - checkout
 
       - run: |
-          docker build -t adeln/youtube .
+          docker info
+          docker build --rm=false -t adeln/youtube .
           docker login -u $DOCKER_USER -p $DOCKER_PASS
           docker push adeln/youtube
