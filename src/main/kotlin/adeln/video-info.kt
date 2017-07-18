@@ -57,6 +57,6 @@ fun audio(client: OkHttpClient, videoId: String): Audio? =
                         lengthSeconds = map["length_seconds"]!!.toLong()
                     )
                 }
-                ?.filter { "audio" in it.type && "webm" !in it.type }
+                ?.filter { "audio" in it.type }
                 ?.maxBy { it.bitrate }
         }
