@@ -1,0 +1,12 @@
+machine:
+  services:
+    - docker
+
+deployment:
+  hub:
+    branch: master
+    commands:
+      - docker info
+      - docker build -t adeln/musicpage .
+      - docker login -e $DOCKER_EMAIL -u $DOCKER_USER -p $DOCKER_PASS
+      - docker push adeln/musicpage
