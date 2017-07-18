@@ -8,6 +8,6 @@ deployment:
     commands:
       - ./gradlew jar
       - docker info
-      - docker build -t adeln/musicpage .
+      - docker build -t adeln/youtube .
       - docker login -e $DOCKER_EMAIL -u $DOCKER_USER -p $DOCKER_PASS
-      - docker push adeln/musicpage
+      - docker push adeln/youtube
