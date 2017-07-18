@@ -25,13 +25,13 @@ data class Audio(
     val lengthSeconds: Long
 )
 
-fun Audio.sizeBytes(): Float =
-    lengthSeconds * bitrate / 8F
+fun Audio.sizeBytes(): Long =
+    (lengthSeconds * bitrate / 8F).toLong()
 
 fun Audio.lengthMillis(): Long =
     lengthSeconds * 1000L
 
-fun audio(client: OkHttpClient, videoId: String): Audio =
+fun audio(client: OkHttpClient, videoId: String): Audio? =
     client.newCall(videoInfoRequest(videoId))
         .execute()
         .body()!!
@@ -41,10 +41,10 @@ fun audio(client: OkHttpClient, videoId: String): Audio =
         .map(::equalsPair)
         .toMap()
         .let { map ->
-            map["adaptive_fmts"]!!
-                .split(",")
-                .asSequence()
-                .map {
+            map["adaptive_fmts"]
+                ?.split(",")
+                ?.asSequence()
+                ?.map {
                     val m = it.split("&")
                         .asSequence()
                         .map(::equalsPair)
@@ -57,6 +57,6 @@ fun audio(client: OkHttpClient, videoId: String): Audio =
                         lengthSeconds = map["length_seconds"]!!.toLong()
                     )
                 }
-                .filter { "audio/webm" in it.type }
-                .maxBy { it.bitrate }!!
+                ?.filter { "audio/webm" in it.type }
+                ?.maxBy { it.bitrate }
         }

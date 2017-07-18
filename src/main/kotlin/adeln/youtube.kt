@@ -50,7 +50,7 @@ fun playlistEntries(client: OkHttpClient, yt: YouTube, playlistId: String): Defe
                     entry(client, it.snippet)
                 }
             }
-            .map {
+            .mapNotNull {
                 it.await()
             }
     }

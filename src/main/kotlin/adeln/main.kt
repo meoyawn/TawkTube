@@ -38,57 +38,60 @@ fun main(args: Array<String>) {
     embeddedServer(Netty, port = 8080) {
         routing {
             get("/playlists") {
-                val playlistId = call.parameters["id"] ?: "PL22J3VaeABQAT-0aSPq-OKOpQlHyR4k5h"
+                try {
+                    val playlistId = call.parameters["id"] ?: "PL22J3VaeABQAT-0aSPq-OKOpQlHyR4k5h"
 
-                val feed = asFeed(OkHttpClient(), mkYoutube(), playlistId)
+                    val feed = asFeed(OkHttpClient(), mkYoutube(), playlistId)
 
-                call.respondWrite {
-                    SyndFeedOutput().output(feed, this)
+                    call.respondWrite {
+                        SyndFeedOutput().output(feed, this)
+                    }
+                } catch (e: Exception) {
+                    e.printStackTrace()
                 }
             }
         }
     }.start(wait = true)
 }
 
-fun entry(client: OkHttpClient, video: PlaylistItemSnippet): SyndEntry =
-    SyndEntryImpl().also {
-        val audio = audio(client, videoId(video))
+fun entry(client: OkHttpClient, video: PlaylistItemSnippet): SyndEntry? =
+    audio(client, videoId(video))?.let { audio ->
+        SyndEntryImpl().also {
+            it.modules = mutableListOf(
+                EntryInformationImpl().also {
+                    it.image = URL(thumbnail(video).url)
+                    it.duration = Duration(audio.lengthMillis())
+                    it.order = video.position.toInt()
+                },
+                MediaEntryModuleImpl().also {
+                    it.mediaContents = arrayOf(
+                        MediaContent(UrlReference(audio.url)).also {
+                            it.duration = audio.lengthSeconds
+                            it.bitrate = audio.bitrate
+                            it.type = audio.type
+                            it.fileSize = audio.sizeBytes()
+                        }
+                    )
+                },
+                DCModuleImpl()
+            )
 
-        it.modules = mutableListOf(
-            EntryInformationImpl().also {
-                it.image = URL(thumbnail(video).url)
-                it.duration = Duration(audio.lengthMillis())
-                it.order = video.position.toInt()
-            },
-            MediaEntryModuleImpl().also {
-                it.mediaContents = arrayOf(
-                    MediaContent(UrlReference(audio.url)).also {
-                        it.duration = audio.lengthSeconds
-                        it.bitrate = audio.bitrate
-                        it.type = audio.type
-                        it.fileSize = audio.sizeBytes().toLong()
-                    }
-                )
-            },
-            DCModuleImpl()
-        )
+            it.enclosures = listOf(
+                SyndEnclosureImpl().also {
+                    it.type = audio.type
+                    it.url = audio.url
+                    it.length = audio.sizeBytes()
+                }
+            )
 
-        it.title = video.title
-        it.link = videoLink(videoId(video))
-        it.author = video.channelTitle
-
-        it.description = SyndContentImpl().also {
-            it.value = video.description
-        }
-        it.publishedDate = video.publishedAt.toDate()
-
-        it.enclosures = listOf(
-            SyndEnclosureImpl().also {
-                it.type = audio.type
-                it.url = audio.url
-                it.length = audio.sizeBytes().toLong()
+            it.title = video.title
+            it.link = videoLink(videoId(video))
+            it.author = video.channelTitle
+            it.description = SyndContentImpl().also {
+                it.value = video.description
             }
-        )
+            it.publishedDate = video.publishedAt.toDate()
+        }
     }
 
 fun playlistLink(playlistId: String): String =
