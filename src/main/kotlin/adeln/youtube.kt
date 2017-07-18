@@ -2,6 +2,7 @@ package adeln
 
 import com.google.api.client.http.javanet.NetHttpTransport
 import com.google.api.client.json.jackson2.JacksonFactory
+import com.google.api.client.util.DateTime
 import com.google.api.services.youtube.YouTube
 import com.google.api.services.youtube.YouTubeRequestInitializer
 import com.google.api.services.youtube.model.Playlist
@@ -13,6 +14,7 @@ import com.rometools.rome.feed.synd.SyndEntry
 import kotlinx.coroutines.experimental.Deferred
 import kotlinx.coroutines.experimental.async
 import okhttp3.OkHttpClient
+import java.util.Date
 
 fun mkYoutube(): YouTube =
     YouTube.Builder(NetHttpTransport(), JacksonFactory()) {}
@@ -59,3 +61,6 @@ fun playlistInfo(yt: YouTube, playlistId: String): Deferred<Playlist> =
             .items
             .first()
     }
+
+fun DateTime.toDate(): Date =
+    Date(value)

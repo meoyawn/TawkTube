@@ -28,6 +28,9 @@ data class Audio(
 fun Audio.sizeBytes(): Float =
     lengthSeconds * bitrate / 8F
 
+fun Audio.lengthMillis(): Long =
+    lengthSeconds * 1000L
+
 fun audio(client: OkHttpClient, videoId: String): Audio =
     client.newCall(videoInfoRequest(videoId))
         .execute()

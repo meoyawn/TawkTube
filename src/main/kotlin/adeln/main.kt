@@ -27,7 +27,6 @@ import org.jetbrains.ktor.netty.Netty
 import org.jetbrains.ktor.routing.get
 import org.jetbrains.ktor.routing.routing
 import java.net.URL
-import java.util.Date
 import java.util.concurrent.Executors
 
 object Secrets {
@@ -63,7 +62,7 @@ fun entry(client: OkHttpClient, video: PlaylistItemSnippet): SyndEntry =
         it.description = SyndContentImpl().also {
             it.value = video.description
         }
-        it.publishedDate = Date(video.publishedAt.value)
+        it.publishedDate = video.publishedAt.toDate()
 
         it.enclosures = listOf(
             SyndEnclosureImpl().also {
@@ -76,7 +75,7 @@ fun entry(client: OkHttpClient, video: PlaylistItemSnippet): SyndEntry =
         it.modules = mutableListOf(
             EntryInformationImpl().also {
                 it.image = URL(thumbnail(video).url)
-                it.duration = Duration(audio.lengthSeconds * 1000L)
+                it.duration = Duration(audio.lengthMillis())
                 it.order = video.position.toInt()
             },
             MediaEntryModuleImpl().also {
@@ -111,7 +110,7 @@ suspend fun asFeed(client: OkHttpClient, yt: YouTube, playlistId: String): SyndF
         it.title = playlist.title
         it.link = playlistLink(playlistId)
         it.description = playlist.description
-        it.publishedDate = Date(playlist.publishedAt.value)
+        it.publishedDate = playlist.publishedAt.toDate()
 
         it.author = playlist.channelTitle
 
