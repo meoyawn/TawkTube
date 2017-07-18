@@ -17,7 +17,6 @@ import com.rometools.rome.feed.synd.SyndEntry
 import com.rometools.rome.feed.synd.SyndEntryImpl
 import com.rometools.rome.feed.synd.SyndFeed
 import com.rometools.rome.feed.synd.SyndFeedImpl
-import com.rometools.rome.io.SyndFeedInput
 import com.rometools.rome.io.SyndFeedOutput
 import com.rometools.rome.io.impl.RSS20Generator
 import kotlinx.coroutines.experimental.asCoroutineDispatcher
@@ -38,11 +37,6 @@ object Secrets {
 val BLOCKING_IO = Executors.newCachedThreadPool().asCoroutineDispatcher()
 
 fun main(args: Array<String>) {
-    SyndFeedInput()
-        .build(URL("http://podsync.net/lqwa").openStream().reader())
-        .entries
-        .first()
-
     embeddedServer(Netty, port = 8080) {
         routing {
             get("/playlists") {
