@@ -50,8 +50,11 @@ fun main(args: Array<String>) {
 fun asFeed(client: OkHttpClient, pi: PlaylistItem): Deferred<SyndEntry> =
     async(CommonPool) {
         SyndEntryImpl().also {
+            val audio = audioUrl(client, videoId(pi))
+
             it.contents = listOf(SyndContentImpl().also {
-                it.value = audioUrl(client, videoId(pi))
+                it.type = audio.type
+                it.value = audio.url
             })
             it.modules = mutableListOf<Module>(EntryInformationImpl().also {
                 it.image = URL(thumbnail(pi).url)

@@ -18,7 +18,13 @@ fun videoInfoRequest(videoId: String): Request =
 fun equalsPair(s: String): Pair<String, String> =
     s.split("=").let { (a, b) -> a to URLDecoder.decode(b, "utf-8") }
 
-fun audioUrl(client: OkHttpClient, videoId: String): String =
+data class Audio(
+    val type: String,
+    val url: String,
+    val bitrate: Int
+)
+
+fun audioUrl(client: OkHttpClient, videoId: String): Audio =
     client.newCall(videoInfoRequest(videoId))
         .execute()
         .body()!!
@@ -31,10 +37,17 @@ fun audioUrl(client: OkHttpClient, videoId: String): String =
         .split(",")
         .asSequence()
         .map {
-            it.split("&")
+            val m = it.split("&")
                 .asSequence()
                 .map(::equalsPair)
                 .toMap()
+
+            Audio(
+                type = m["type"]!!,
+                url = m["url"]!!,
+                bitrate = m["bitrate"]!!.toInt()
+            )
         }
-        .filter { "audio" in it["type"]!! }
-        .maxBy { it["bitrate"]!!.toInt() }!!["url"]!!
+        .filter { "audio" in it.type }
+        .maxBy { it.bitrate }!!
+
