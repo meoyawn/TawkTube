@@ -29,7 +29,10 @@ fun thumbnail(item: PlaylistItemSnippet): Thumbnail =
     item.thumbnails.best()
 
 fun ThumbnailDetails.best(): Thumbnail =
-    maxBy { (_, v) -> (v as Thumbnail).width }!!.value as Thumbnail
+    maxBy { (_, v) ->
+        val t = v as Thumbnail
+        t.width * t.height
+    }!!.value as Thumbnail
 
 fun videoId(pi: PlaylistItemSnippet): String =
     pi.resourceId.videoId

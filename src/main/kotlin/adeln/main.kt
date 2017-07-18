@@ -2,14 +2,13 @@ package adeln
 
 import com.google.api.services.youtube.YouTube
 import com.google.api.services.youtube.model.PlaylistItemSnippet
-import com.google.api.services.youtube.model.PlaylistSnippet
 import com.rometools.modules.itunes.EntryInformationImpl
 import com.rometools.modules.itunes.FeedInformationImpl
 import com.rometools.modules.itunes.types.Duration
 import com.rometools.modules.mediarss.MediaEntryModuleImpl
 import com.rometools.modules.mediarss.types.MediaContent
 import com.rometools.modules.mediarss.types.UrlReference
-import com.rometools.rome.feed.module.Module
+import com.rometools.rome.feed.module.DCModuleImpl
 import com.rometools.rome.feed.rss.Channel
 import com.rometools.rome.feed.synd.SyndContentImpl
 import com.rometools.rome.feed.synd.SyndEnclosureImpl
@@ -55,6 +54,25 @@ fun entry(client: OkHttpClient, video: PlaylistItemSnippet): SyndEntry =
     SyndEntryImpl().also {
         val audio = audio(client, videoId(video))
 
+        it.modules = mutableListOf(
+            EntryInformationImpl().also {
+                it.image = URL(thumbnail(video).url)
+                it.duration = Duration(audio.lengthMillis())
+                it.order = video.position.toInt()
+            },
+            MediaEntryModuleImpl().also {
+                it.mediaContents = arrayOf(
+                    MediaContent(UrlReference(audio.url)).also {
+                        it.duration = audio.lengthSeconds
+                        it.bitrate = audio.bitrate
+                        it.type = audio.type
+                        it.fileSize = audio.sizeBytes().toLong()
+                    }
+                )
+            },
+            DCModuleImpl()
+        )
+
         it.title = video.title
         it.link = videoLink(videoId(video))
         it.author = video.channelTitle
@@ -71,24 +89,6 @@ fun entry(client: OkHttpClient, video: PlaylistItemSnippet): SyndEntry =
                 it.length = audio.sizeBytes().toLong()
             }
         )
-
-        it.modules = mutableListOf(
-            EntryInformationImpl().also {
-                it.image = URL(thumbnail(video).url)
-                it.duration = Duration(audio.lengthMillis())
-                it.order = video.position.toInt()
-            },
-            MediaEntryModuleImpl().also {
-                it.mediaContents = arrayOf(
-                    MediaContent(UrlReference(audio.url)).also {
-                        it.duration = audio.lengthSeconds
-                        it.bitrate = audio.bitrate
-                        it.type = audio.type
-                        it.fileSize = audio.sizeBytes().toLong()
-                    }
-                )
-            }
-        )
     }
 
 fun playlistLink(playlistId: String): String =
@@ -97,24 +97,24 @@ fun playlistLink(playlistId: String): String =
 fun videoLink(videoId: String): String =
     "https://youtube.com/watch?v=$videoId"
 
-fun toITunes(playlist: PlaylistSnippet): Module =
-    FeedInformationImpl().also {
-        it.image = URL(thumbnail(playlist).url)
-    }
-
 suspend fun asFeed(client: OkHttpClient, yt: YouTube, playlistId: String): SyndFeed {
 
     val playlist = playlistInfo(yt, playlistId).await().snippet
 
     return SyndFeedImpl(Channel(RSS20Generator().type)).also {
+
+        it.modules = mutableListOf(
+            FeedInformationImpl().also {
+                it.image = URL(thumbnail(playlist).url)
+            },
+            DCModuleImpl()
+        )
+
         it.title = playlist.title
         it.link = playlistLink(playlistId)
         it.description = playlist.description
         it.publishedDate = playlist.publishedAt.toDate()
-
         it.author = playlist.channelTitle
-
-        it.modules = mutableListOf(toITunes(playlist))
         it.entries = playlistEntries(client, yt, playlistId).await()
     }
 }
