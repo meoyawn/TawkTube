@@ -21,10 +21,14 @@ fun equalsPair(s: String): Pair<String, String> =
 data class Audio(
     val type: String,
     val url: String,
-    val bitrate: Int
+    val bitrate: Float,
+    val lengthSeconds: Long
 )
 
-fun audioUrl(client: OkHttpClient, videoId: String): Audio =
+fun Audio.sizeBytes(): Float =
+    lengthSeconds * bitrate / 8F
+
+fun audio(client: OkHttpClient, videoId: String): Audio =
     client.newCall(videoInfoRequest(videoId))
         .execute()
         .body()!!
@@ -32,22 +36,24 @@ fun audioUrl(client: OkHttpClient, videoId: String): Audio =
         .split("&")
         .asSequence()
         .map(::equalsPair)
-        .find { (k, _) -> k == "adaptive_fmts" }!!
-        .second
-        .split(",")
-        .asSequence()
-        .map {
-            val m = it.split("&")
+        .toMap()
+        .let { map ->
+            map["adaptive_fmts"]!!
+                .split(",")
                 .asSequence()
-                .map(::equalsPair)
-                .toMap()
+                .map {
+                    val m = it.split("&")
+                        .asSequence()
+                        .map(::equalsPair)
+                        .toMap()
 
-            Audio(
-                type = m["type"]!!,
-                url = m["url"]!!,
-                bitrate = m["bitrate"]!!.toInt()
-            )
+                    Audio(
+                        type = m["type"]!!,
+                        url = m["url"]!!,
+                        bitrate = m["bitrate"]!!.toFloat(),
+                        lengthSeconds = map["length_seconds"]!!.toLong()
+                    )
+                }
+                .filter { "audio/webm" in it.type }
+                .maxBy { it.bitrate }!!
         }
-        .filter { "audio" in it.type }
-        .maxBy { it.bitrate }!!
-
