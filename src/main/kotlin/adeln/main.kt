@@ -54,17 +54,29 @@ fun main(args: Array<String>) {
     }.start(wait = true)
 }
 
+inline fun itunesEntry(f: (EntryInformationImpl) -> Unit): EntryInformationImpl =
+    EntryInformationImpl().also(f)
+
+inline fun mediaEntry(f: (MediaEntryModuleImpl) -> Unit): MediaEntryModuleImpl =
+    MediaEntryModuleImpl().also(f)
+
+inline fun entry(f: (SyndEntryImpl) -> Unit): SyndEntryImpl =
+    SyndEntryImpl().also(f)
+
+inline fun mediaContent(url: String, f: (MediaContent) -> Unit): MediaContent =
+    MediaContent(UrlReference(url)).also(f)
+
 fun entry(client: OkHttpClient, video: PlaylistItemSnippet): SyndEntry? =
     audio(client, videoId(video))?.let { audio ->
-        SyndEntryImpl().also {
+        entry {
             it.modules = mutableListOf(
-                EntryInformationImpl().also {
+                itunesEntry {
                     it.image = URL(thumbnail(video).url)
                     it.duration = Duration(audio.lengthMillis())
                 },
-                MediaEntryModuleImpl().also {
+                mediaEntry {
                     it.mediaContents = arrayOf(
-                        MediaContent(UrlReference(audio.url)).also {
+                        mediaContent(audio.url) {
                             it.duration = audio.lengthSeconds
                             it.bitrate = audio.bitrate
                             it.type = audio.type
