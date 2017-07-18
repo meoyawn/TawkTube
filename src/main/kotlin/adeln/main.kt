@@ -63,6 +63,7 @@ fun entry(client: OkHttpClient, video: PlaylistItemSnippet): SyndEntry =
         it.description = SyndContentImpl().also {
             it.value = video.description
         }
+        it.publishedDate = Date(video.publishedAt.value)
 
         it.enclosures = listOf(
             SyndEnclosureImpl().also {
@@ -76,6 +77,7 @@ fun entry(client: OkHttpClient, video: PlaylistItemSnippet): SyndEntry =
             EntryInformationImpl().also {
                 it.image = URL(thumbnail(video).url)
                 it.duration = Duration(audio.lengthSeconds * 1000L)
+                it.order = video.position.toInt()
             },
             MediaEntryModuleImpl().also {
                 it.mediaContents = arrayOf(
