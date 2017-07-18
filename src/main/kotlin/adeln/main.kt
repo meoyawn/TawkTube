@@ -73,6 +73,7 @@ fun entry(client: OkHttpClient, video: PlaylistItemSnippet): SyndEntry? =
                 itunesEntry {
                     it.image = URL(thumbnail(video).url)
                     it.duration = Duration(audio.lengthMillis())
+                    it.order = video.position.toInt()
                 },
                 mediaEntry {
                     it.mediaContents = arrayOf(
