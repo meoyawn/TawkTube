@@ -18,8 +18,10 @@ fun videoInfoRequest(videoId: String): Request =
 fun equalsPair(s: String): Pair<String, String> =
     s.split("=").let { (a, b) -> a to URLDecoder.decode(b, "utf-8") }
 
+typealias MimeType = String
+
 data class Audio(
-    val type: String,
+    val type: MimeType,
     val url: String,
     val bitrate: Float,
     val lengthSeconds: Long
@@ -30,6 +32,9 @@ fun Audio.sizeBytes(): Long =
 
 fun Audio.lengthMillis(): Long =
     lengthSeconds * 1000L
+
+fun goodAudio(type: MimeType): Boolean =
+    "audio" in type && "webm" !in type
 
 fun audio(client: OkHttpClient, videoId: String): Audio? =
     client.newCall(videoInfoRequest(videoId))
@@ -57,6 +62,6 @@ fun audio(client: OkHttpClient, videoId: String): Audio? =
                         lengthSeconds = map["length_seconds"]!!.toLong()
                     )
                 }
-                ?.filter { "audio" in it.type }
+                ?.filter { goodAudio(it.type) }
                 ?.maxBy { it.bitrate }
         }
