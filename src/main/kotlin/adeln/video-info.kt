@@ -5,12 +5,12 @@ import okhttp3.OkHttpClient
 import okhttp3.Request
 import java.net.URLDecoder
 
-fun videoInfoUrl(videoId: String): HttpUrl =
+fun videoInfoUrl(videoId: VideoId): HttpUrl =
     HttpUrl.parse("http://www.youtube.com/get_video_info")!!.newBuilder()
-        .setQueryParameter("video_id", videoId)
+        .setQueryParameter("video_id", videoId.id)
         .build()
 
-fun videoInfoRequest(videoId: String): Request =
+fun videoInfoRequest(videoId: VideoId): Request =
     Request.Builder()
         .url(videoInfoUrl(videoId))
         .build()
@@ -22,7 +22,7 @@ typealias MimeType = String
 
 data class Audio(
     val type: MimeType,
-    val url: String,
+    val url: HttpUrl,
     val bitrate: Float,
     val lengthSeconds: Long
 )
@@ -36,7 +36,7 @@ fun Audio.lengthMillis(): Long =
 fun goodAudio(type: MimeType): Boolean =
     "audio" in type && "webm" !in type
 
-fun audio(client: OkHttpClient, videoId: String): Audio? =
+fun audio(client: OkHttpClient, videoId: VideoId): Audio? =
     client.newCall(videoInfoRequest(videoId))
         .execute()
         .body()!!
@@ -57,7 +57,7 @@ fun audio(client: OkHttpClient, videoId: String): Audio? =
 
                     Audio(
                         type = m["type"]!!,
-                        url = m["url"]!!,
+                        url = HttpUrl.parse(m["url"])!!,
                         bitrate = m["bitrate"]!!.toFloat(),
                         lengthSeconds = map["length_seconds"]!!.toLong()
                     )

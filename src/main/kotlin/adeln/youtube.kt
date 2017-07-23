@@ -12,9 +12,21 @@ import com.google.api.services.youtube.model.Thumbnail
 import com.google.api.services.youtube.model.ThumbnailDetails
 import com.rometools.rome.feed.synd.SyndEntry
 import kotlinx.coroutines.experimental.Deferred
+import kotlinx.coroutines.experimental.asCoroutineDispatcher
 import kotlinx.coroutines.experimental.async
+import okhttp3.HttpUrl
 import okhttp3.OkHttpClient
 import java.util.Date
+import java.util.concurrent.Executors
+
+data class VideoId(val id: String)
+data class PlaylistId(val id: String)
+
+fun videoLink(videoId: VideoId): HttpUrl =
+    HttpUrl.parse("https://youtube.com/watch?v=${videoId.id}")!!
+
+fun playlistLink(playlistId: PlaylistId): HttpUrl =
+    HttpUrl.parse("https://youtube.com/playlist?list=${playlistId.id}")!!
 
 fun mkYoutube(): YouTube =
     YouTube.Builder(NetHttpTransport(), JacksonFactory()) {}
@@ -28,20 +40,22 @@ fun thumbnail(playlist: PlaylistSnippet): Thumbnail =
 fun thumbnail(item: PlaylistItemSnippet): Thumbnail =
     item.thumbnails.best()
 
+val BLOCKING_IO = Executors.newCachedThreadPool().asCoroutineDispatcher()
+
 fun ThumbnailDetails.best(): Thumbnail =
     maxBy { (_, v) ->
         val t = v as Thumbnail
         t.width * t.height
     }!!.value as Thumbnail
 
-fun videoId(pi: PlaylistItemSnippet): String =
-    pi.resourceId.videoId
+fun videoId(pi: PlaylistItemSnippet): VideoId =
+    VideoId(pi.resourceId.videoId)
 
-fun playlistEntries(client: OkHttpClient, yt: YouTube, playlistId: String): Deferred<List<SyndEntry>> =
+fun playlistEntries(client: OkHttpClient, yt: YouTube, playlistId: PlaylistId): Deferred<List<SyndEntry>> =
     async(BLOCKING_IO) {
         yt.playlistItems()
             .list("snippet")
-            .setPlaylistId(playlistId)
+            .setPlaylistId(playlistId.id)
             .setMaxResults(50)
             .execute()
             .items
@@ -55,11 +69,11 @@ fun playlistEntries(client: OkHttpClient, yt: YouTube, playlistId: String): Defe
             }
     }
 
-fun playlistInfo(yt: YouTube, playlistId: String): Deferred<Playlist> =
+fun playlistInfo(yt: YouTube, playlistId: PlaylistId): Deferred<Playlist> =
     async(BLOCKING_IO) {
         yt.playlists()
             .list("snippet")
-            .setId(playlistId)
+            .setId(playlistId.id)
             .execute()
             .items
             .first()
