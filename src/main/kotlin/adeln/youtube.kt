@@ -5,11 +5,11 @@ import com.google.api.client.json.jackson2.JacksonFactory
 import com.google.api.client.util.DateTime
 import com.google.api.services.youtube.YouTube
 import com.google.api.services.youtube.YouTubeRequestInitializer
-import com.google.api.services.youtube.model.Playlist
 import com.google.api.services.youtube.model.PlaylistItemSnippet
 import com.google.api.services.youtube.model.PlaylistSnippet
 import com.google.api.services.youtube.model.Thumbnail
 import com.google.api.services.youtube.model.ThumbnailDetails
+import com.google.api.services.youtube.model.VideoSnippet
 import com.rometools.rome.feed.synd.SyndEntry
 import kotlinx.coroutines.experimental.Deferred
 import kotlinx.coroutines.experimental.asCoroutineDispatcher
@@ -69,15 +69,25 @@ fun playlistEntries(client: OkHttpClient, yt: YouTube, playlistId: PlaylistId): 
             }
     }
 
-fun playlistInfo(yt: YouTube, playlistId: PlaylistId): Deferred<Playlist> =
+fun YouTube.playlistInfo(playlistId: PlaylistId): Deferred<PlaylistSnippet> =
     async(BLOCKING_IO) {
-        yt.playlists()
+        playlists()
             .list("snippet")
             .setId(playlistId.id)
             .execute()
             .items
             .first()
+            .snippet
     }
 
 fun DateTime.toDate(): Date =
     Date(value)
+
+fun YouTube.videoInfo(id: VideoId): VideoSnippet =
+    videos()
+        .list("snippet")
+        .setId(id.id)
+        .execute()
+        .items
+        .first()
+        .snippet

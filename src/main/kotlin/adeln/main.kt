@@ -21,7 +21,7 @@ fun main(args: Array<String>) {
     embeddedServer(Netty, port = 8080) {
         routing {
             get("/video") {
-                val videoId = call.parameters["v"]
+                val videoId = VideoId(call.parameters["v"]!!)
             }
 
             get("/playlist") { playlist(client, youtube) }

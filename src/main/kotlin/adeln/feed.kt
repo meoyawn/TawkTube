@@ -75,7 +75,7 @@ fun entry(client: OkHttpClient, video: PlaylistItemSnippet): SyndEntry? =
 
 suspend fun asFeed(client: OkHttpClient, yt: YouTube, playlistId: PlaylistId): SyndFeed {
 
-    val playlist = playlistInfo(yt, playlistId).await().snippet
+    val playlist = yt.playlistInfo(playlistId).await()
 
     return SyndFeedImpl(Channel(RSS20Generator().type)).also {
 
