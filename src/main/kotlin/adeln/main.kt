@@ -7,11 +7,16 @@ import org.jetbrains.ktor.content.respondWrite
 import org.jetbrains.ktor.host.embeddedServer
 import org.jetbrains.ktor.netty.Netty
 import org.jetbrains.ktor.pipeline.PipelineContext
+import org.jetbrains.ktor.response.respondRedirect
 import org.jetbrains.ktor.routing.get
 import org.jetbrains.ktor.routing.routing
 
 object Secrets {
     val YT_KEY = "AIzaSyBXaU6RB0KwBFqEz5sdcyjXiNySefvUHLc"
+}
+
+object Config {
+    val ADDR = "http://165.227.137.147"
 }
 
 fun main(args: Array<String>) {
@@ -28,6 +33,13 @@ fun main(args: Array<String>) {
 
             // legacy
             get("/playlists") { playlist(client, youtube) }
+
+            get("/audio") {
+                val videoId = VideoId(call.parameters["v"]!!)
+                audio(client, videoId)
+                    ?.let { call.respondRedirect(it.url.toString()) }
+                    ?: error("404")
+            }
         }
     }.start(wait = true)
 }

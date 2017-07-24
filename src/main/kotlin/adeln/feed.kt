@@ -33,9 +33,12 @@ inline fun entry(f: (SyndEntryImpl) -> Unit): SyndEntryImpl =
 inline fun mediaContent(url: HttpUrl, f: (MediaContent) -> Unit): MediaContent =
     MediaContent(UrlReference(url.uri())).also(f)
 
-fun entry(client: OkHttpClient, video: PlaylistItemSnippet): SyndEntry? =
-    audio(client, videoId(video))?.let { audio ->
+fun entry(client: OkHttpClient, video: PlaylistItemSnippet): SyndEntry? {
+    val videoId = videoId(video)
+    return audio(client, videoId)?.let { audio ->
         entry {
+            val url = HttpUrl.parse("${Config.ADDR}/audio?v=${videoId.id}")!!
+
             it.modules = mutableListOf(
                 itunesEntry {
                     it.image = URL(thumbnail(video).url)
@@ -44,7 +47,7 @@ fun entry(client: OkHttpClient, video: PlaylistItemSnippet): SyndEntry? =
                 },
                 mediaEntry {
                     it.mediaContents = arrayOf(
-                        mediaContent(audio.url) {
+                        mediaContent(url) {
                             it.duration = audio.lengthSeconds
                             it.bitrate = audio.bitrate
                             it.type = audio.type
@@ -58,13 +61,13 @@ fun entry(client: OkHttpClient, video: PlaylistItemSnippet): SyndEntry? =
             it.enclosures = listOf(
                 SyndEnclosureImpl().also {
                     it.type = audio.type
-                    it.url = audio.url.toString()
+                    it.url = url.toString()
                     it.length = audio.sizeBytes()
                 }
             )
 
             it.title = video.title
-            it.link = videoLink(videoId(video)).toString()
+            it.link = videoLink(videoId).toString()
             it.author = video.channelTitle
             it.description = SyndContentImpl().also {
                 it.value = video.description
@@ -72,6 +75,7 @@ fun entry(client: OkHttpClient, video: PlaylistItemSnippet): SyndEntry? =
             it.publishedDate = video.publishedAt.toDate()
         }
     }
+}
 
 suspend fun asFeed(client: OkHttpClient, yt: YouTube, playlistId: PlaylistId): SyndFeed {
 
