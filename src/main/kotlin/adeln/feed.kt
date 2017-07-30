@@ -93,7 +93,7 @@ fun entry(video: Video, audio: Audio): SyndEntryImpl =
 
 fun asFeed(client: OkHttpClient, yt: YouTube, videoId: VideoId): SyndFeed? =
     audio(client, videoId)?.let { audio ->
-        val video = yt.videoInfo(videoId)
+        val video = yt.videoInfo(videoId).toVideo(videoId)
 
         rss20 {
             it.modules = mutableListOf(
@@ -108,7 +108,7 @@ fun asFeed(client: OkHttpClient, yt: YouTube, videoId: VideoId): SyndFeed? =
             it.description = video.description
             it.publishedDate = video.publishedAt.toDate()
             it.author = video.channelTitle
-            it.entries = listOf(entry(video = video.toRepr(videoId), audio = audio))
+            it.entries = listOf(entry(video, audio))
         }
     }
 

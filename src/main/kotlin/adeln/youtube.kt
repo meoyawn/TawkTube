@@ -52,7 +52,7 @@ fun playlistEntries(client: OkHttpClient, yt: YouTube, playlistId: PlaylistId): 
             .items
             .map {
                 async(BLOCKING_IO) {
-                    entry(client, it.snippet.toRepr())
+                    entry(client, it.snippet.toVideo())
                 }
             }
             .mapNotNull {
@@ -93,7 +93,7 @@ data class Video(
     val publishedAt: DateTime
 )
 
-fun VideoSnippet.toRepr(id: VideoId): Video =
+fun VideoSnippet.toVideo(id: VideoId): Video =
     Video(
         id = id,
         thumbnails = thumbnails,
@@ -104,7 +104,7 @@ fun VideoSnippet.toRepr(id: VideoId): Video =
         publishedAt = publishedAt
     )
 
-fun PlaylistItemSnippet.toRepr(): Video =
+fun PlaylistItemSnippet.toVideo(): Video =
     Video(
         id = VideoId(resourceId.videoId),
         thumbnails = thumbnails,
