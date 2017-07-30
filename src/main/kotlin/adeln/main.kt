@@ -25,14 +25,15 @@ fun main(args: Array<String>) {
 
     embeddedServer(Netty, port = 8080) {
         routing {
+            get("/channel") {
+
+            }
+
             get("/video") {
                 val videoId = VideoId(call.parameters["v"]!!)
             }
 
             get("/playlist") { playlist(client, youtube) }
-
-            // legacy
-            get("/playlists") { playlist(client, youtube) }
 
             get("/audio") {
                 val videoId = VideoId(call.parameters["v"]!!)
@@ -46,7 +47,7 @@ fun main(args: Array<String>) {
 
 suspend fun PipelineContext<*>.playlist(client: OkHttpClient, youTube: YouTube): Unit =
     try {
-        val id = call.parameters["list"] ?: call.parameters["id"]
+        val id = call.parameters["list"]
 
         val feed = asFeed(client, youTube, PlaylistId(id!!))
 
