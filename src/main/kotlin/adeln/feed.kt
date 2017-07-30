@@ -1,7 +1,6 @@
 package adeln
 
 import com.google.api.services.youtube.YouTube
-import com.google.api.services.youtube.model.PlaylistItemSnippet
 import com.rometools.modules.itunes.EntryInformationImpl
 import com.rometools.modules.itunes.FeedInformationImpl
 import com.rometools.modules.itunes.types.Duration
@@ -60,33 +59,36 @@ fun enclosures(audio: Audio, url: HttpUrl): List<SyndEnclosureImpl> =
         }
     )
 
-fun entry(client: OkHttpClient, video: PlaylistItemSnippet): SyndEntry? {
-    val videoId = videoId(video)
-    return audio(client, videoId)?.let { audio ->
-        entry {
-            val url = HttpUrl.parse("${Config.ADDR}/audio?v=${videoId.id}")!!
-
-            it.modules = mutableListOf(
-                itunesEntry {
-                    it.image = URL(video.thumbnails.best().url)
-                    it.duration = Duration(audio.lengthMillis())
-                    it.order = video.position.toInt()
-                },
-                media(audio, url),
-                DCModuleImpl()
-            )
-
-            it.enclosures = enclosures(audio, url)
-
-            it.title = video.title
-            it.link = videoLink(videoId).toString()
-            it.author = video.channelTitle
-            it.description = SyndContentImpl().also {
-                it.value = video.description
-            }
-            it.publishedDate = video.publishedAt.toDate()
-        }
+fun entry(client: OkHttpClient, video: Video): SyndEntry? =
+    audio(client, video.id)?.let {
+        entry(video, it)
     }
+
+fun entry(video: Video, audio: Audio): SyndEntryImpl =
+    entry {
+        val url = HttpUrl.parse("${Config.ADDR}/audio?v=${video.id.id}")!!
+
+        it.modules = mutableListOf(
+            itunesEntry { itunes ->
+                itunes.image = URL(video.thumbnails.best().url)
+                itunes.duration = Duration(audio.lengthMillis())
+                video.position?.let {
+                    itunes.order = it.toInt()
+                }
+            },
+            media(audio, url),
+            DCModuleImpl()
+        )
+
+        it.enclosures = enclosures(audio, url)
+
+        it.title = video.title
+        it.link = videoLink(video.id).toString()
+        it.author = video.channelTitle
+        it.description = SyndContentImpl().also {
+            it.value = video.description
+        }
+        it.publishedDate = video.publishedAt.toDate()
 }
 
 fun asFeed(client: OkHttpClient, yt: YouTube, videoId: VideoId): SyndFeed? =
@@ -106,28 +108,7 @@ fun asFeed(client: OkHttpClient, yt: YouTube, videoId: VideoId): SyndFeed? =
             it.description = video.description
             it.publishedDate = video.publishedAt.toDate()
             it.author = video.channelTitle
-            it.entries = listOf(
-                entry {
-                    val url = HttpUrl.parse("${Config.ADDR}/audio?v=${videoId.id}")!!
-
-                    it.modules = mutableListOf(
-                        itunesEntry {
-                            it.image = URL(video.thumbnails.best().url)
-                            it.duration = Duration(audio.lengthMillis())
-                        },
-                        media(audio, url),
-                        DCModuleImpl()
-                    )
-
-                    it.enclosures = enclosures(audio, url)
-
-                    it.title = video.title
-                    it.link = videoLink(videoId).toString()
-                    it.author = video.channelTitle
-                    it.description = SyndContentImpl().also { it.value = video.description }
-                    it.publishedDate = video.publishedAt.toDate()
-                }
-            )
+            it.entries = listOf(entry(video = video.toRepr(videoId), audio = audio))
         }
     }
 

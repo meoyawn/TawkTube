@@ -55,7 +55,7 @@ fun playlistEntries(client: OkHttpClient, yt: YouTube, playlistId: PlaylistId): 
             .items
             .map {
                 async(BLOCKING_IO) {
-                    entry(client, it.snippet)
+                    entry(client, it.snippet.toRepr())
                 }
             }
             .mapNotNull {
@@ -85,3 +85,35 @@ fun YouTube.videoInfo(id: VideoId): VideoSnippet =
         .items
         .first()
         .snippet
+
+data class Video(
+    val id: VideoId,
+    val thumbnails: ThumbnailDetails,
+    val position: Long?,
+    val title: String,
+    val channelTitle: String,
+    val description: String,
+    val publishedAt: DateTime
+)
+
+fun VideoSnippet.toRepr(id: VideoId): Video =
+    Video(
+        thumbnails = thumbnails,
+        position = null,
+        title = title,
+        channelTitle = channelTitle,
+        description = description,
+        publishedAt = publishedAt,
+        id = id
+    )
+
+fun PlaylistItemSnippet.toRepr(): Video =
+    Video(
+        thumbnails = thumbnails,
+        position = position,
+        title = title,
+        channelTitle = channelTitle,
+        description = description,
+        publishedAt = publishedAt,
+        id = videoId(this)
+    )
