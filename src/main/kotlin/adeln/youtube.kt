@@ -34,12 +34,6 @@ fun mkYoutube(): YouTube =
         .setYouTubeRequestInitializer(YouTubeRequestInitializer(Secrets.YT_KEY))
         .build()
 
-fun thumbnail(playlist: PlaylistSnippet): Thumbnail =
-    playlist.thumbnails.best()
-
-fun thumbnail(item: PlaylistItemSnippet): Thumbnail =
-    item.thumbnails.best()
-
 val BLOCKING_IO = Executors.newCachedThreadPool().asCoroutineDispatcher()
 
 fun ThumbnailDetails.best(): Thumbnail =

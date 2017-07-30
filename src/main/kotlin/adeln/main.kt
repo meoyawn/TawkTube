@@ -6,6 +6,7 @@ import org.jetbrains.ktor.content.respondWrite
 import org.jetbrains.ktor.host.embeddedServer
 import org.jetbrains.ktor.http.HttpStatusCode
 import org.jetbrains.ktor.netty.Netty
+import org.jetbrains.ktor.pipeline.PipelineContext
 import org.jetbrains.ktor.response.respondRedirect
 import org.jetbrains.ktor.routing.get
 import org.jetbrains.ktor.routing.routing
@@ -22,6 +23,7 @@ object Config {
 fun main(args: Array<String>) {
     val client = OkHttpClient()
     val youtube = mkYoutube()
+    val output = SyndFeedOutput()
 
     embeddedServer(Netty, port = 8080) {
         routing {
@@ -30,22 +32,26 @@ fun main(args: Array<String>) {
             }
 
             get("/video") {
-                val videoId = VideoId(call.parameters["v"]!!)
+                notImplemented {
+                    val videoId = VideoId(call.parameters["v"]!!)
+                    asFeed(client, youtube, videoId)
+                        ?.let { feed ->
+                            call.respondWrite {
+                                output.output(feed, this)
+                            }
+                        }
+                        ?: call.response.status(HttpStatusCode.NotImplemented)
+                }
             }
 
             get("/playlist") {
-                try {
-                    val id = call.parameters["list"]
+                notImplemented {
+                    val playlistId = PlaylistId(call.parameters["list"]!!)
 
-                    val feed = asFeed(client, youtube, PlaylistId(id!!))
+                    val feed = asFeed(client, youtube, playlistId)
 
                     call.respondWrite {
-                        SyndFeedOutput().output(feed, this)
-                    }
-                } catch (e: Exception) {
-                    call.response.status(HttpStatusCode.NotImplemented)
-                    call.respondWrite {
-                        e.printStackTrace(PrintWriter(this))
+                        output.output(feed, this)
                     }
                 }
             }
@@ -59,3 +65,13 @@ fun main(args: Array<String>) {
         }
     }.start(wait = true)
 }
+
+suspend fun <T : Any> PipelineContext<T>.notImplemented(f: suspend PipelineContext<T>.() -> Unit): Unit =
+    try {
+        f()
+    } catch (e: Exception) {
+        call.response.status(HttpStatusCode.NotImplemented)
+        call.respondWrite {
+            e.printStackTrace(PrintWriter(this))
+        }
+    }

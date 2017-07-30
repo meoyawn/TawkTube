@@ -33,6 +33,33 @@ inline fun entry(f: (SyndEntryImpl) -> Unit): SyndEntryImpl =
 inline fun mediaContent(url: HttpUrl, f: (MediaContent) -> Unit): MediaContent =
     MediaContent(UrlReference(url.uri())).also(f)
 
+inline fun rss20(f: (SyndFeedImpl) -> Unit): SyndFeedImpl =
+    SyndFeedImpl(Channel(RSS20Generator().type)).also(f)
+
+inline fun itunes(f: (FeedInformationImpl) -> Unit): FeedInformationImpl =
+    FeedInformationImpl().also(f)
+
+fun media(audio: Audio, url: HttpUrl): MediaEntryModuleImpl =
+    mediaEntry {
+        it.mediaContents = arrayOf(
+            mediaContent(url) {
+                it.duration = audio.lengthSeconds
+                it.bitrate = audio.bitrate
+                it.type = audio.type
+                it.fileSize = audio.sizeBytes()
+            }
+        )
+    }
+
+fun enclosures(audio: Audio, url: HttpUrl): List<SyndEnclosureImpl> =
+    listOf(
+        SyndEnclosureImpl().also {
+            it.type = audio.type
+            it.url = url.toString()
+            it.length = audio.sizeBytes()
+        }
+    )
+
 fun entry(client: OkHttpClient, video: PlaylistItemSnippet): SyndEntry? {
     val videoId = videoId(video)
     return audio(client, videoId)?.let { audio ->
@@ -41,30 +68,15 @@ fun entry(client: OkHttpClient, video: PlaylistItemSnippet): SyndEntry? {
 
             it.modules = mutableListOf(
                 itunesEntry {
-                    it.image = URL(thumbnail(video).url)
+                    it.image = URL(video.thumbnails.best().url)
                     it.duration = Duration(audio.lengthMillis())
                     it.order = video.position.toInt()
                 },
-                mediaEntry {
-                    it.mediaContents = arrayOf(
-                        mediaContent(url) {
-                            it.duration = audio.lengthSeconds
-                            it.bitrate = audio.bitrate
-                            it.type = audio.type
-                            it.fileSize = audio.sizeBytes()
-                        }
-                    )
-                },
+                media(audio, url),
                 DCModuleImpl()
             )
 
-            it.enclosures = listOf(
-                SyndEnclosureImpl().also {
-                    it.type = audio.type
-                    it.url = url.toString()
-                    it.length = audio.sizeBytes()
-                }
-            )
+            it.enclosures = enclosures(audio, url)
 
             it.title = video.title
             it.link = videoLink(videoId).toString()
@@ -77,15 +89,56 @@ fun entry(client: OkHttpClient, video: PlaylistItemSnippet): SyndEntry? {
     }
 }
 
+fun asFeed(client: OkHttpClient, yt: YouTube, videoId: VideoId): SyndFeed? =
+    audio(client, videoId)?.let { audio ->
+        val video = yt.videoInfo(videoId)
+
+        rss20 {
+            it.modules = mutableListOf(
+                itunes {
+                    it.image = URL(video.thumbnails.best().url)
+                },
+                DCModuleImpl()
+            )
+
+            it.title = video.title
+            it.link = videoLink(videoId).toString()
+            it.description = video.description
+            it.publishedDate = video.publishedAt.toDate()
+            it.author = video.channelTitle
+            it.entries = listOf(
+                entry {
+                    val url = HttpUrl.parse("${Config.ADDR}/audio?v=${videoId.id}")!!
+
+                    it.modules = mutableListOf(
+                        itunesEntry {
+                            it.image = URL(video.thumbnails.best().url)
+                            it.duration = Duration(audio.lengthMillis())
+                        },
+                        media(audio, url),
+                        DCModuleImpl()
+                    )
+
+                    it.enclosures = enclosures(audio, url)
+
+                    it.title = video.title
+                    it.link = videoLink(videoId).toString()
+                    it.author = video.channelTitle
+                    it.description = SyndContentImpl().also { it.value = video.description }
+                    it.publishedDate = video.publishedAt.toDate()
+                }
+            )
+        }
+    }
+
 suspend fun asFeed(client: OkHttpClient, yt: YouTube, playlistId: PlaylistId): SyndFeed {
 
     val playlist = yt.playlistInfo(playlistId).await()
 
-    return SyndFeedImpl(Channel(RSS20Generator().type)).also {
-
+    return rss20 {
         it.modules = mutableListOf(
-            FeedInformationImpl().also {
-                it.image = URL(thumbnail(playlist).url)
+            itunes {
+                it.image = URL(playlist.thumbnails.best().url)
             },
             DCModuleImpl()
         )
