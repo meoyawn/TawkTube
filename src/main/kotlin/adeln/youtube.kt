@@ -42,9 +42,6 @@ fun ThumbnailDetails.best(): Thumbnail =
         t.width * t.height
     }!!.value as Thumbnail
 
-fun videoId(pi: PlaylistItemSnippet): VideoId =
-    VideoId(pi.resourceId.videoId)
-
 fun playlistEntries(client: OkHttpClient, yt: YouTube, playlistId: PlaylistId): Deferred<List<SyndEntry>> =
     async(BLOCKING_IO) {
         yt.playlistItems()
@@ -98,22 +95,22 @@ data class Video(
 
 fun VideoSnippet.toRepr(id: VideoId): Video =
     Video(
+        id = id,
         thumbnails = thumbnails,
         position = null,
         title = title,
         channelTitle = channelTitle,
         description = description,
-        publishedAt = publishedAt,
-        id = id
+        publishedAt = publishedAt
     )
 
 fun PlaylistItemSnippet.toRepr(): Video =
     Video(
+        id = VideoId(resourceId.videoId),
         thumbnails = thumbnails,
         position = position,
         title = title,
         channelTitle = channelTitle,
         description = description,
-        publishedAt = publishedAt,
-        id = videoId(this)
+        publishedAt = publishedAt
     )
