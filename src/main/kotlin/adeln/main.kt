@@ -11,6 +11,7 @@ import org.jetbrains.ktor.pipeline.PipelineContext
 import org.jetbrains.ktor.response.respondRedirect
 import org.jetbrains.ktor.routing.get
 import org.jetbrains.ktor.routing.routing
+import org.jetbrains.ktor.util.toMap
 import java.io.PrintWriter
 
 object Secrets {
@@ -59,7 +60,7 @@ fun main(args: Array<String>) {
 
             get("/audio") {
                 val headers = call.request.headers
-                println(headers)
+                println(headers.toMap())
 
                 val player = headers[HttpHeaders.UserAgent]
                     ?.startsWith("Mozilla/")
