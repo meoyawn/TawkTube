@@ -4,6 +4,7 @@ import com.rometools.rome.io.SyndFeedOutput
 import okhttp3.OkHttpClient
 import org.jetbrains.ktor.content.respondWrite
 import org.jetbrains.ktor.host.embeddedServer
+import org.jetbrains.ktor.http.HttpHeaders
 import org.jetbrains.ktor.http.HttpStatusCode
 import org.jetbrains.ktor.netty.Netty
 import org.jetbrains.ktor.pipeline.PipelineContext
@@ -57,8 +58,17 @@ fun main(args: Array<String>) {
             }
 
             get("/audio") {
+                val headers = call.request.headers
+                println(headers)
+
+                val player = headers[HttpHeaders.UserAgent]
+                    ?.startsWith("Mozilla/")
+                    .takeIf { it == true }
+                    ?.let { Player.BROWSER }
+                    ?: Player.OTHER
+
                 val videoId = VideoID(call.parameters["v"]!!)
-                audio(client, videoId)
+                audio(client, videoId, player)
                     ?.let { call.respondRedirect(it.url.toString()) }
                     ?: error("404")
             }

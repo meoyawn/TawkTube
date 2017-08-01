@@ -33,10 +33,21 @@ fun Audio.sizeBytes(): Long =
 fun Audio.lengthMillis(): Long =
     lengthSeconds * 1000L
 
-fun goodAudio(type: MimeType): Boolean =
-    "audio" in type && "webm" !in type
+enum class Player {
+    BROWSER,
+    OTHER,
+}
 
-fun audio(client: OkHttpClient, videoID: VideoID): Audio? =
+fun playerType(type: MimeType, player: Player): Boolean =
+    when (player) {
+        Player.BROWSER ->
+            "webm" in type
+
+        Player.OTHER ->
+            "webm" !in type
+    }
+
+fun audio(client: OkHttpClient, videoID: VideoID, player: Player = Player.OTHER): Audio? =
     client.newCall(videoInfoRequest(videoID))
         .execute()
         .body()!!
@@ -62,6 +73,6 @@ fun audio(client: OkHttpClient, videoID: VideoID): Audio? =
                         lengthSeconds = map["length_seconds"]!!.toLong()
                     )
                 }
-                ?.filter { goodAudio(it.type) }
+                ?.filter { "audio" in it.type && playerType(it.type, player) }
                 ?.maxBy { it.bitrate }
         }
