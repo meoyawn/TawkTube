@@ -91,9 +91,9 @@ fun entry(video: Video, audio: Audio): SyndEntryImpl =
         it.publishedDate = video.publishedAt.toDate()
 }
 
-fun asFeed(client: OkHttpClient, yt: YouTube, videoId: VideoId): SyndFeed? =
-    audio(client, videoId)?.let { audio ->
-        val video = yt.videoInfo(videoId).toVideo(videoId)
+fun asFeed(client: OkHttpClient, yt: YouTube, videoID: VideoID): SyndFeed? =
+    audio(client, videoID)?.let { audio ->
+        val video = yt.videoInfo(videoID).toVideo(videoID)
 
         rss20 {
             it.modules = mutableListOf(
@@ -104,7 +104,7 @@ fun asFeed(client: OkHttpClient, yt: YouTube, videoId: VideoId): SyndFeed? =
             )
 
             it.title = video.title
-            it.link = videoLink(videoId).toString()
+            it.link = videoLink(videoID).toString()
             it.description = video.description
             it.publishedDate = video.publishedAt.toDate()
             it.author = video.channelTitle
@@ -112,9 +112,9 @@ fun asFeed(client: OkHttpClient, yt: YouTube, videoId: VideoId): SyndFeed? =
         }
     }
 
-suspend fun asFeed(client: OkHttpClient, yt: YouTube, playlistId: PlaylistId): SyndFeed {
+suspend fun asFeed(client: OkHttpClient, yt: YouTube, playlistID: PlaylistID): SyndFeed {
 
-    val playlist = yt.playlistInfo(playlistId).await()
+    val playlist = yt.playlistInfo(playlistID)
 
     return rss20 {
         it.modules = mutableListOf(
@@ -125,10 +125,10 @@ suspend fun asFeed(client: OkHttpClient, yt: YouTube, playlistId: PlaylistId): S
         )
 
         it.title = playlist.title
-        it.link = playlistLink(playlistId).toString()
+        it.link = playlistLink(playlistID).toString()
         it.description = playlist.description
         it.publishedDate = playlist.publishedAt.toDate()
         it.author = playlist.channelTitle
-        it.entries = playlistEntries(client, yt, playlistId).await()
+        it.entries = playlistEntries(client, yt, playlistID).await()
     }
 }

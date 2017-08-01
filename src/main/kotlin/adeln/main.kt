@@ -33,7 +33,7 @@ fun main(args: Array<String>) {
 
             get("/video") {
                 notImplemented {
-                    val videoId = VideoId(call.parameters["v"]!!)
+                    val videoId = VideoID(call.parameters["v"]!!)
                     asFeed(client, youtube, videoId)
                         ?.let { feed ->
                             call.respondWrite {
@@ -46,7 +46,7 @@ fun main(args: Array<String>) {
 
             get("/playlist") {
                 notImplemented {
-                    val playlistId = PlaylistId(call.parameters["list"]!!)
+                    val playlistId = PlaylistID(call.parameters["list"]!!)
 
                     val feed = asFeed(client, youtube, playlistId)
 
@@ -57,7 +57,7 @@ fun main(args: Array<String>) {
             }
 
             get("/audio") {
-                val videoId = VideoId(call.parameters["v"]!!)
+                val videoId = VideoID(call.parameters["v"]!!)
                 audio(client, videoId)
                     ?.let { call.respondRedirect(it.url.toString()) }
                     ?: error("404")

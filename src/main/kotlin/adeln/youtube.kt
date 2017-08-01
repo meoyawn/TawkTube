@@ -5,7 +5,8 @@ import com.google.api.client.json.jackson2.JacksonFactory
 import com.google.api.client.util.DateTime
 import com.google.api.services.youtube.YouTube
 import com.google.api.services.youtube.YouTubeRequestInitializer
-import com.google.api.services.youtube.model.PlaylistItemSnippet
+import com.google.api.services.youtube.model.ChannelContentDetails
+import com.google.api.services.youtube.model.ChannelSnippet
 import com.google.api.services.youtube.model.PlaylistSnippet
 import com.google.api.services.youtube.model.Thumbnail
 import com.google.api.services.youtube.model.ThumbnailDetails
@@ -19,14 +20,15 @@ import okhttp3.OkHttpClient
 import java.util.Date
 import java.util.concurrent.Executors
 
-data class VideoId(val id: String)
-data class PlaylistId(val id: String)
+data class VideoID(val id: String)
+data class PlaylistID(val id: String)
+data class ChannelID(val id: String)
 
-fun videoLink(videoId: VideoId): HttpUrl =
-    HttpUrl.parse("https://youtube.com/watch?v=${videoId.id}")!!
+fun videoLink(videoID: VideoID): HttpUrl =
+    HttpUrl.parse("https://youtube.com/watch?v=${videoID.id}")!!
 
-fun playlistLink(playlistId: PlaylistId): HttpUrl =
-    HttpUrl.parse("https://youtube.com/playlist?list=${playlistId.id}")!!
+fun playlistLink(playlistID: PlaylistID): HttpUrl =
+    HttpUrl.parse("https://youtube.com/playlist?list=${playlistID.id}")!!
 
 fun mkYoutube(): YouTube =
     YouTube.Builder(NetHttpTransport(), JacksonFactory()) {}
@@ -42,11 +44,19 @@ fun ThumbnailDetails.best(): Thumbnail =
         t.width * t.height
     }!!.value as Thumbnail
 
-fun playlistEntries(client: OkHttpClient, yt: YouTube, playlistId: PlaylistId): Deferred<List<SyndEntry>> =
+fun DateTime.toDate(): Date =
+    Date(value)
+
+data class Channel(
+    val snippet: ChannelSnippet,
+    val contentDetails: ChannelContentDetails
+)
+
+fun playlistEntries(client: OkHttpClient, yt: YouTube, playlistID: PlaylistID): Deferred<List<SyndEntry>> =
     async(BLOCKING_IO) {
         yt.playlistItems()
             .list("snippet")
-            .setPlaylistId(playlistId.id)
+            .setPlaylistId(playlistID.id)
             .setMaxResults(50)
             .execute()
             .items
@@ -60,21 +70,16 @@ fun playlistEntries(client: OkHttpClient, yt: YouTube, playlistId: PlaylistId): 
             }
     }
 
-fun YouTube.playlistInfo(playlistId: PlaylistId): Deferred<PlaylistSnippet> =
-    async(BLOCKING_IO) {
-        playlists()
-            .list("snippet")
-            .setId(playlistId.id)
-            .execute()
-            .items
-            .first()
-            .snippet
-    }
+fun YouTube.playlistInfo(playlistID: PlaylistID): PlaylistSnippet =
+    playlists()
+        .list("snippet")
+        .setId(playlistID.id)
+        .execute()
+        .items
+        .first()
+        .snippet
 
-fun DateTime.toDate(): Date =
-    Date(value)
-
-fun YouTube.videoInfo(id: VideoId): VideoSnippet =
+fun YouTube.videoInfo(id: VideoID): VideoSnippet =
     videos()
         .list("snippet")
         .setId(id.id)
@@ -83,34 +88,13 @@ fun YouTube.videoInfo(id: VideoId): VideoSnippet =
         .first()
         .snippet
 
-data class Video(
-    val id: VideoId,
-    val thumbnails: ThumbnailDetails,
-    val position: Long?,
-    val title: String,
-    val channelTitle: String,
-    val description: String,
-    val publishedAt: DateTime
-)
-
-fun VideoSnippet.toVideo(id: VideoId): Video =
-    Video(
-        id = id,
-        thumbnails = thumbnails,
-        position = null,
-        title = title,
-        channelTitle = channelTitle,
-        description = description,
-        publishedAt = publishedAt
-    )
-
-fun PlaylistItemSnippet.toVideo(): Video =
-    Video(
-        id = VideoId(resourceId.videoId),
-        thumbnails = thumbnails,
-        position = position,
-        title = title,
-        channelTitle = channelTitle,
-        description = description,
-        publishedAt = publishedAt
-    )
+fun YouTube.channel(id: ChannelID): Channel =
+    channels()
+        .list("snippet,contentDetails")
+        .setId(id.id)
+        .execute()
+        .items
+        .first()
+        .let {
+            Channel(it.snippet, it.contentDetails)
+        }

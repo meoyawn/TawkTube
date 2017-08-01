@@ -5,14 +5,14 @@ import okhttp3.OkHttpClient
 import okhttp3.Request
 import java.net.URLDecoder
 
-fun videoInfoUrl(videoId: VideoId): HttpUrl =
+fun videoInfoUrl(videoID: VideoID): HttpUrl =
     HttpUrl.parse("http://www.youtube.com/get_video_info")!!.newBuilder()
-        .setQueryParameter("video_id", videoId.id)
+        .setQueryParameter("video_id", videoID.id)
         .build()
 
-fun videoInfoRequest(videoId: VideoId): Request =
+fun videoInfoRequest(videoID: VideoID): Request =
     Request.Builder()
-        .url(videoInfoUrl(videoId))
+        .url(videoInfoUrl(videoID))
         .build()
 
 fun equalsPair(s: String): Pair<String, String> =
@@ -36,8 +36,8 @@ fun Audio.lengthMillis(): Long =
 fun goodAudio(type: MimeType): Boolean =
     "audio" in type && "webm" !in type
 
-fun audio(client: OkHttpClient, videoId: VideoId): Audio? =
-    client.newCall(videoInfoRequest(videoId))
+fun audio(client: OkHttpClient, videoID: VideoID): Audio? =
+    client.newCall(videoInfoRequest(videoID))
         .execute()
         .body()!!
         .string()
