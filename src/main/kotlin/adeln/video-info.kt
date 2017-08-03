@@ -93,36 +93,3 @@ fun anyAudio(audios: List<Audio>?): Audio? =
     audios
         ?.filter { "audio" in it.type }
         ?.maxBy { it.bitrate }
-
-data class YoutubeToMp3(
-    val title: String,
-    val length: Long,
-    val link: String
-)
-
-fun youtubeToMp3(client: OkHttpClient, videoID: VideoID, moshi: Moshi): Audio {
-    val req = Request.Builder()
-        .url("http://www.youtubeinmp3.com/fetch/?format=JSON&video=https://www.youtube.com/watch?v=${videoID.id}")
-        .build()
-
-    val resp = client.newCall(req).execute()
-
-    val yiM3 = moshi.adapter(YoutubeToMp3::class.java)
-        .fromJson(resp.body()!!.source())!!
-
-    val bitrate = Request.Builder()
-        .head()
-        .url(yiM3.link)
-        .build()
-
-    val hs = client.newCall(bitrate).execute().headers()
-
-    val size = hs["Content-Length"]!!.toLong()
-
-    return Audio(
-        type = hs["Content-Type"]!!,
-        url = HttpUrl.parse(yiM3.link)!!,
-        bitrate = adeln.bitrate(yiM3.length, size),
-        lengthSeconds = yiM3.length
-    )
-}
