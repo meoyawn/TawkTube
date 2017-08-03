@@ -1,5 +1,6 @@
 package adeln
 
+import com.squareup.moshi.Moshi
 import okhttp3.HttpUrl
 import okhttp3.OkHttpClient
 import okhttp3.Request
@@ -30,6 +31,9 @@ data class Audio(
 fun Audio.sizeBytes(): Long =
     (lengthSeconds * bitrate / 8F).toLong()
 
+fun bitrate(length: Long, size: Long): Float =
+    (size * 8F) / length
+
 fun Audio.lengthMillis(): Long =
     lengthSeconds * 1000L
 
@@ -47,7 +51,7 @@ fun playerType(type: MimeType, player: Player): Boolean =
             "webm" !in type
     }
 
-fun audio(client: OkHttpClient, videoID: VideoID, player: Player = Player.OTHER): Audio? =
+fun audio(client: OkHttpClient, videoID: VideoID, moshi: Moshi, player: Player = Player.OTHER): Audio? =
     client.newCall(videoInfoRequest(videoID))
         .execute()
         .body()!!
@@ -57,7 +61,7 @@ fun audio(client: OkHttpClient, videoID: VideoID, player: Player = Player.OTHER)
         .map(::equalsPair)
         .toMap()
         .let { map ->
-            map["adaptive_fmts"]
+            val audios = map["adaptive_fmts"]
                 ?.split(",")
                 ?.asSequence()
                 ?.map {
@@ -73,6 +77,52 @@ fun audio(client: OkHttpClient, videoID: VideoID, player: Player = Player.OTHER)
                         lengthSeconds = map["length_seconds"]!!.toLong()
                     )
                 }
-                ?.filter { "audio" in it.type && playerType(it.type, player) }
-                ?.maxBy { it.bitrate }
+                ?.toList()
+
+            goodAudio(audios, player)
+                ?: anyAudio(audios)
+                ?: youtubeToMp3(client, videoID, moshi)
         }
+
+fun goodAudio(audios: List<Audio>?, player: Player): Audio? =
+    audios
+        ?.filter { "audio" in it.type && playerType(it.type, player) }
+        ?.maxBy { it.bitrate }
+
+fun anyAudio(audios: List<Audio>?): Audio? =
+    audios
+        ?.filter { "audio" in it.type }
+        ?.maxBy { it.bitrate }
+
+data class YoutubeToMp3(
+    val title: String,
+    val length: Long,
+    val link: String
+)
+
+fun youtubeToMp3(client: OkHttpClient, videoID: VideoID, moshi: Moshi): Audio {
+    val req = Request.Builder()
+        .url("http://www.youtubeinmp3.com/fetch/?format=JSON&video=https://www.youtube.com/watch?v=${videoID.id}")
+        .build()
+
+    val resp = client.newCall(req).execute()
+
+    val yiM3 = moshi.adapter(YoutubeToMp3::class.java)
+        .fromJson(resp.body()!!.source())!!
+
+    val bitrate = Request.Builder()
+        .head()
+        .url(yiM3.link)
+        .build()
+
+    val hs = client.newCall(bitrate).execute().headers()
+
+    val size = hs["Content-Length"]!!.toLong()
+
+    return Audio(
+        type = hs["Content-Type"]!!,
+        url = HttpUrl.parse(yiM3.link)!!,
+        bitrate = adeln.bitrate(yiM3.length, size),
+        lengthSeconds = yiM3.length
+    )
+}

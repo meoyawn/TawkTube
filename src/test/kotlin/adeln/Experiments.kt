@@ -5,11 +5,23 @@ import org.junit.Test
 class Experiments {
 
     @Test
-    fun lol() {
-        val youtube = mkYoutube()
-
+    fun channel() {
         println(
-            youtube.channel(ChannelID("UCC3L8QaxqEGUiBC252GHy3w"))
+            mkYoutube().channel(ChannelID("UCC3L8QaxqEGUiBC252GHy3w"))
+        )
+    }
+
+    @Test
+    fun y2mp3() {
+        println(
+            youtubeToMp3(mkClient(), VideoID("v2soHxEN79c"), mkMoshi())
+        )
+    }
+
+    @Test
+    fun youtube() {
+        println(
+            audio(mkClient(), VideoID("v2soHxEN79c"), mkMoshi(), Player.BROWSER)
         )
     }
 }

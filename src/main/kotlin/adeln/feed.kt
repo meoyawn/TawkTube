@@ -16,6 +16,7 @@ import com.rometools.rome.feed.synd.SyndEntryImpl
 import com.rometools.rome.feed.synd.SyndFeed
 import com.rometools.rome.feed.synd.SyndFeedImpl
 import com.rometools.rome.io.impl.RSS20Generator
+import com.squareup.moshi.Moshi
 import okhttp3.HttpUrl
 import okhttp3.OkHttpClient
 import java.net.URL
@@ -59,8 +60,8 @@ fun enclosures(audio: Audio, url: HttpUrl): List<SyndEnclosureImpl> =
         }
     )
 
-fun entry(client: OkHttpClient, video: Video): SyndEntry? =
-    audio(client, video.id)?.let {
+fun entry(client: OkHttpClient, video: Video, moshi: Moshi): SyndEntry? =
+    audio(client, video.id, moshi = moshi)?.let {
         entry(video, it)
     }
 
@@ -91,8 +92,8 @@ fun entry(video: Video, audio: Audio): SyndEntryImpl =
         it.publishedDate = video.publishedAt.toDate()
 }
 
-fun asFeed(client: OkHttpClient, yt: YouTube, videoID: VideoID): SyndFeed? =
-    audio(client, videoID)?.let { audio ->
+fun asFeed(client: OkHttpClient, yt: YouTube, videoID: VideoID, moshi: Moshi): SyndFeed? =
+    audio(client, videoID, moshi = moshi)?.let { audio ->
         val video = yt.videoInfo(videoID).toVideo(videoID)
 
         rss20 {
@@ -112,7 +113,7 @@ fun asFeed(client: OkHttpClient, yt: YouTube, videoID: VideoID): SyndFeed? =
         }
     }
 
-suspend fun asFeed(client: OkHttpClient, yt: YouTube, playlistID: PlaylistID): SyndFeed {
+suspend fun asFeed(client: OkHttpClient, yt: YouTube, playlistID: PlaylistID, moshi: Moshi): SyndFeed {
 
     val playlist = yt.playlistInfo(playlistID)
 
@@ -129,6 +130,6 @@ suspend fun asFeed(client: OkHttpClient, yt: YouTube, playlistID: PlaylistID): S
         it.description = playlist.description
         it.publishedDate = playlist.publishedAt.toDate()
         it.author = playlist.channelTitle
-        it.entries = playlistEntries(client, yt, playlistID).await()
+        it.entries = playlistEntries(client, yt, playlistID, moshi).await()
     }
 }

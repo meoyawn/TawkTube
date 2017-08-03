@@ -1,6 +1,7 @@
 package adeln
 
 import com.rometools.rome.io.SyndFeedOutput
+import com.squareup.moshi.Moshi
 import okhttp3.OkHttpClient
 import org.jetbrains.ktor.content.respondWrite
 import org.jetbrains.ktor.host.embeddedServer
@@ -22,10 +23,21 @@ object Config {
     val ADDR = "http://165.227.137.147"
 }
 
+fun mkClient(): OkHttpClient =
+    OkHttpClient.Builder()
+        .followRedirects(true)
+        .build()
+
+fun mkMoshi(): Moshi =
+    Moshi.Builder()
+        .build()
+
 fun main(args: Array<String>) {
-    val client = OkHttpClient()
+
+    val client = mkClient()
     val youtube = mkYoutube()
     val output = SyndFeedOutput()
+    val moshi = mkMoshi()
 
     embeddedServer(Netty, port = 8080) {
         routing {
@@ -36,7 +48,7 @@ fun main(args: Array<String>) {
             get("/video") {
                 notImplemented {
                     val videoId = VideoID(call.parameters["v"]!!)
-                    asFeed(client, youtube, videoId)
+                    asFeed(client, youtube, videoId, moshi = moshi)
                         ?.let { feed ->
                             call.respondWrite {
                                 output.output(feed, this)
@@ -50,7 +62,7 @@ fun main(args: Array<String>) {
                 notImplemented {
                     val playlistId = PlaylistID(call.parameters["list"]!!)
 
-                    val feed = asFeed(client, youtube, playlistId)
+                    val feed = asFeed(client, youtube, playlistId, moshi)
 
                     call.respondWrite {
                         output.output(feed, this)
@@ -69,7 +81,7 @@ fun main(args: Array<String>) {
                     ?: Player.OTHER
 
                 val videoId = VideoID(call.parameters["v"]!!)
-                audio(client, videoId, player)
+                audio(client, videoId, moshi, player)
                     ?.let { call.respondRedirect(it.url.toString()) }
                     ?: error("404")
             }
