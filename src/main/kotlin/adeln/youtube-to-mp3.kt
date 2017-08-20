@@ -32,14 +32,14 @@ fun youtubeToMp3(client: OkHttpClient, videoID: VideoID, moshi: Moshi): Audio? {
 
         val hs = client.newCall(bitrate).execute().headers()
 
-        val size = hs["Content-Length"]!!.toLong()
-
-        Audio(
-            type = hs["Content-Type"]!!,
-            url = HttpUrl.parse(yiM3.link)!!,
-            bitrate = adeln.bitrate(yiM3.length, size),
-            lengthSeconds = yiM3.length
-        )
+        hs["Content-Length"]?.toLong()?.let { size ->
+            Audio(
+                type = hs["Content-Type"]!!,
+                url = HttpUrl.parse(yiM3.link)!!,
+                bitrate = adeln.bitrate(yiM3.length, size),
+                lengthSeconds = yiM3.length
+            )
+        }
     } catch (e: JsonEncodingException) {
         println("failed $videoLink")
         null
