@@ -20,7 +20,7 @@ object Secrets {
 }
 
 object Config {
-    val ADDR = "http://165.227.137.147"
+    val ADDR = "https://limitless-atoll-85321.herokuapp.com"
 }
 
 fun mkClient(): OkHttpClient =
@@ -39,7 +39,9 @@ fun main(args: Array<String>) {
     val output = SyndFeedOutput()
     val moshi = mkMoshi()
 
-    embeddedServer(Netty, port = 8080) {
+    val port = System.getenv("PORT")?.toInt() ?: 8080
+
+    embeddedServer(Netty, port = port) {
         routing {
             get("/channel") {
 
