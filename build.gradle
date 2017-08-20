@@ -65,3 +65,5 @@ jar {
         attributes attrs
     }
 }
+
+task stage(dependsOn: "build")
