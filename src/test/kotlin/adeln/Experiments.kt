@@ -24,4 +24,11 @@ class Experiments {
             audio(mkClient(), VideoID("v2soHxEN79c"), mkMoshi(), Player.BROWSER)
         )
     }
+
+    @Test
+    fun badVideo() {
+        println(
+            audio(mkClient(), VideoID("6G59zsjM2UI"), mkMoshi(), Player.BROWSER)
+        )
+    }
 }
