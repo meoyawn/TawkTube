@@ -11,14 +11,14 @@ jobs:
       - checkout
 
       - restore_cache:
-          key: lol-{{ checksum "build.gradle" }}
+          key: cache-{{ checksum "build.gradle" }}
 
       - run: ./gradlew build
 
       - save_cache:
           paths:
             - ~/.gradle
-          key: lol-{{ checksum "build.gradle" }}
+          key: cache-{{ checksum "build.gradle" }}
 
       - store_test_results:
           path: build/reports
