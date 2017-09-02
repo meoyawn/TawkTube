@@ -11,16 +11,14 @@ jobs:
       - checkout
 
       - restore_cache:
-          key: lol-{{ checksum "build.gradle" }}
+          key: lol-{{ checksum "build.gradle" }}-{{ checksum ".circleci/config.yml" }}
 
-      - run: ./gradlew dependencies
+      - run: ./gradlew build
 
       - save_cache:
           paths:
             - ~/.gradle
-          key: lol-{{ checksum "build.gradle" }}
-
-      - run: ./gradlew build
+          key: lol-{{ checksum "build.gradle" }}-{{ checksum ".circleci/config.yml" }}
 
       - store_test_results:
           path: build/reports/tests/test
