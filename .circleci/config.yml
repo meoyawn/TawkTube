@@ -21,4 +21,4 @@ jobs:
           key: cache-{{ checksum "build.gradle" }}
 
       - store_test_results:
-          path: build/reports
+          path: build/test-results
