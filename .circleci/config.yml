@@ -21,4 +21,4 @@ jobs:
           key: lol-{{ checksum "build.gradle" }}-{{ checksum ".circleci/config.yml" }}
 
       - store_test_results:
-          path: build/reports/tests/test
+          path: build/reports/tests
