@@ -1,6 +1,5 @@
 version: 2
 
-version: 2
 jobs:
   build:
     working_directory: ~/work
@@ -10,7 +9,7 @@ jobs:
 
     steps:
       - checkout
-      
+
       - restore_cache:
           key: lol-{{ checksum "build.gradle" }}
 
