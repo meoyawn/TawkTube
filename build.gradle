@@ -2,6 +2,7 @@ version '1.0-SNAPSHOT'
 
 buildscript {
     ext.kotlin_version = '1.2+'
+    ext.rome_version = "1.8.0"
 
     repositories {
         jcenter()
@@ -25,19 +26,20 @@ repositories {
 
 dependencies {
     compile "org.jetbrains.kotlin:kotlin-stdlib-jre8:$kotlin_version"
-    compile 'org.jetbrains.kotlinx:kotlinx-coroutines-core:0.19-alpha-2'
+    compile "org.jetbrains.kotlin:kotlin-reflect:$kotlin_version"
+    compile 'org.jetbrains.kotlinx:kotlinx-coroutines-core:0.20-alpha-6'
 
-    compile group: 'com.squareup.okhttp3', name: 'okhttp', version: '3.8.1'
+    compile group: 'com.squareup.okhttp3', name: 'okhttp', version: '3.9.0'
     compile group: 'com.squareup.moshi', name: 'moshi', version: '1.5.0'
 
-    compile group: 'com.rometools', name: 'rome', version: '1.7.4'
-    compile group: 'com.rometools', name: 'rome-modules', version: '1.7.4'
+    compile group: 'com.rometools', name: 'rome', version: rome_version
+    compile group: 'com.rometools', name: 'rome-modules', version: rome_version
 
-    compile 'com.google.apis:google-api-services-youtube:v3-rev183-1.22.0'
+    compile 'com.google.apis:google-api-services-youtube:v3-rev186-1.23.0'
 
-    compile "org.jetbrains.ktor:ktor-netty:0.4.0"
+    compile "org.jetbrains.ktor:ktor-netty:0.4.1-alpha-16"
 
-    testCompile 'io.kotlintest:kotlintest:2.0.5'
+    testCompile 'io.kotlintest:kotlintest:2.0.7'
 }
 
 kotlin {
