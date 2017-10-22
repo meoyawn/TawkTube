@@ -72,7 +72,7 @@ fun audio(client: OkHttpClient, videoID: VideoID, moshi: Moshi, player: Player =
 
                     Audio(
                         type = m["type"]!!,
-                        url = HttpUrl.parse(m["url"])!!,
+                        url = HttpUrl.parse(m["url"]!!)!!,
                         bitrate = m["bitrate"]!!.toFloat(),
                         lengthSeconds = map["length_seconds"]!!.toLong()
                     )
