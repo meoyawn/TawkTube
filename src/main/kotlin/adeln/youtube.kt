@@ -40,10 +40,9 @@ fun mkYoutube(): YouTube =
 val BLOCKING_IO = Executors.newCachedThreadPool().asCoroutineDispatcher()
 
 fun ThumbnailDetails.best(): Thumbnail =
-    maxBy { (_, v) ->
-        val t = v as Thumbnail
-        t.width * t.height
-    }!!.value as Thumbnail
+    asSequence()
+        .map { (_, v) -> v as Thumbnail }
+        .maxBy { it.width }!!
 
 fun DateTime.toDate(): Date =
     Date(value)

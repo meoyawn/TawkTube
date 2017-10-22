@@ -1,10 +1,11 @@
 version '1.0-SNAPSHOT'
 
 buildscript {
-    ext.kotlin_version = '1.1.4-3'
+    ext.kotlin_version = '1.2+'
 
     repositories {
         jcenter()
+        maven { url "http://dl.bintray.com/kotlin/kotlin-eap-1.2" }
     }
     dependencies {
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
@@ -19,6 +20,7 @@ apply plugin: "application"
 repositories {
     jcenter()
     maven { url "https://dl.bintray.com/kotlin/ktor" }
+    maven { url "http://dl.bintray.com/kotlin/kotlin-eap-1.2" }
 }
 
 dependencies {

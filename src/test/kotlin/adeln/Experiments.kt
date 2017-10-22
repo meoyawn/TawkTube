@@ -31,4 +31,9 @@ class Experiments {
             audio(mkClient(), VideoID("6G59zsjM2UI"), mkMoshi(), Player.BROWSER)
         )
     }
+
+    @Test
+    fun whatthefuck() {
+        VideoID("1TN_Ig8sjxc")
+    }
 }
