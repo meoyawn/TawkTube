@@ -37,7 +37,6 @@ fun main(args: Array<String>) {
     val client = mkClient()
     val youtube = mkYoutube()
     val output = SyndFeedOutput()
-    val moshi = mkMoshi()
 
     val port = System.getenv("PORT")?.toInt() ?: 8080
 
@@ -50,7 +49,7 @@ fun main(args: Array<String>) {
             get("/video") {
                 notImplemented {
                     val videoId = VideoID(call.parameters["v"]!!)
-                    asFeed(client, youtube, videoId, moshi = moshi)
+                    asFeed(client, youtube, videoId)
                         ?.let { feed ->
                             call.respondWrite {
                                 output.output(feed, this)
@@ -64,7 +63,7 @@ fun main(args: Array<String>) {
                 notImplemented {
                     val playlistId = PlaylistID(call.parameters["list"]!!)
 
-                    val feed = asFeed(client, youtube, playlistId, moshi)
+                    val feed = asFeed(client, youtube, playlistId)
 
                     call.respondWrite {
                         output.output(feed, this)

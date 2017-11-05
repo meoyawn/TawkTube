@@ -42,6 +42,10 @@ dependencies {
     testCompile 'io.kotlintest:kotlintest:2.0.7'
 }
 
+compileKotlin {
+    kotlinOptions.allWarningsAsErrors = true
+}
+
 kotlin {
     experimental {
         coroutines 'enable'

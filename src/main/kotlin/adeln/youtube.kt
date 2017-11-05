@@ -12,7 +12,6 @@ import com.google.api.services.youtube.model.Thumbnail
 import com.google.api.services.youtube.model.ThumbnailDetails
 import com.google.api.services.youtube.model.VideoSnippet
 import com.rometools.rome.feed.synd.SyndEntry
-import com.squareup.moshi.Moshi
 import kotlinx.coroutines.experimental.Deferred
 import kotlinx.coroutines.experimental.asCoroutineDispatcher
 import kotlinx.coroutines.experimental.async
@@ -52,7 +51,7 @@ data class Channel(
     val contentDetails: ChannelContentDetails
 )
 
-fun playlistEntries(client: OkHttpClient, yt: YouTube, playlistID: PlaylistID, moshi: Moshi): Deferred<List<SyndEntry>> =
+fun playlistEntries(client: OkHttpClient, yt: YouTube, playlistID: PlaylistID): Deferred<List<SyndEntry>> =
     async(BLOCKING_IO) {
         yt.playlistItems()
             .list("snippet")
@@ -62,7 +61,7 @@ fun playlistEntries(client: OkHttpClient, yt: YouTube, playlistID: PlaylistID, m
             .items
             .map {
                 async(BLOCKING_IO) {
-                    entry(client, it.snippet.toVideo(), moshi)
+                    entry(client, it.snippet.toVideo())
                 }
             }
             .mapNotNull {
