@@ -1,6 +1,5 @@
 package adeln
 
-import com.squareup.moshi.Moshi
 import okhttp3.HttpUrl
 import okhttp3.OkHttpClient
 import okhttp3.Request
@@ -51,7 +50,7 @@ fun playerType(type: MimeType, player: Player): Boolean =
             "webm" !in type
     }
 
-fun audio(client: OkHttpClient, videoID: VideoID, moshi: Moshi, player: Player = Player.OTHER): Audio? =
+fun audio(client: OkHttpClient, videoID: VideoID, player: Player = Player.OTHER): Audio? =
     client.newCall(videoInfoRequest(videoID))
         .execute()
         .body()!!
@@ -79,9 +78,7 @@ fun audio(client: OkHttpClient, videoID: VideoID, moshi: Moshi, player: Player =
                 }
                 ?.toList()
 
-            goodAudio(audios, player)
-                ?: anyAudio(audios)
-                ?: youtubeToMp3(client, videoID, moshi)
+            goodAudio(audios, player) ?: anyAudio(audios)
         }
 
 fun goodAudio(audios: List<Audio>?, player: Player): Audio? =

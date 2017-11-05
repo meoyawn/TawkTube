@@ -83,7 +83,7 @@ fun main(args: Array<String>) {
                     ?: Player.OTHER
 
                 val videoId = VideoID(call.parameters["v"]!!)
-                audio(client, videoId, moshi, player)
+                audio(client, videoId, player)
                     ?.let { call.respondRedirect(it.url.toString()) }
                     ?: error("404")
             }

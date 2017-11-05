@@ -10,7 +10,7 @@ buildscript {
     }
     dependencies {
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
-        classpath 'com.github.ben-manes:gradle-versions-plugin:0.15.0'
+        classpath 'com.github.ben-manes:gradle-versions-plugin:0.17.0'
     }
 }
 
@@ -27,7 +27,7 @@ repositories {
 dependencies {
     compile "org.jetbrains.kotlin:kotlin-stdlib-jre8:$kotlin_version"
     compile "org.jetbrains.kotlin:kotlin-reflect:$kotlin_version"
-    compile 'org.jetbrains.kotlinx:kotlinx-coroutines-core:0.20-alpha-6'
+    compile 'org.jetbrains.kotlinx:kotlinx-coroutines-core:0.20-alpha-8'
 
     compile group: 'com.squareup.okhttp3', name: 'okhttp', version: '3.9.0'
     compile group: 'com.squareup.moshi', name: 'moshi', version: '1.5.0'
@@ -35,7 +35,7 @@ dependencies {
     compile group: 'com.rometools', name: 'rome', version: rome_version
     compile group: 'com.rometools', name: 'rome-modules', version: rome_version
 
-    compile 'com.google.apis:google-api-services-youtube:v3-rev186-1.23.0'
+    compile 'com.google.apis:google-api-services-youtube:v3-rev187-1.23.0'
 
     compile "org.jetbrains.ktor:ktor-netty:0.4.1-alpha-16"
 

@@ -61,7 +61,7 @@ fun enclosures(audio: Audio, url: HttpUrl): List<SyndEnclosureImpl> =
     )
 
 fun entry(client: OkHttpClient, video: Video, moshi: Moshi): SyndEntry? =
-    audio(client, video.id, moshi = moshi)?.let {
+    audio(client, video.id)?.let {
         entry(video, it)
     }
 
@@ -93,7 +93,7 @@ fun entry(video: Video, audio: Audio): SyndEntryImpl =
 }
 
 fun asFeed(client: OkHttpClient, yt: YouTube, videoID: VideoID, moshi: Moshi): SyndFeed? =
-    audio(client, videoID, moshi = moshi)?.let { audio ->
+    audio(client, videoID)?.let { audio ->
         val video = yt.videoInfo(videoID).toVideo(videoID)
 
         rss20 {

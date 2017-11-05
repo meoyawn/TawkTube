@@ -12,23 +12,16 @@ class Experiments {
     }
 
     @Test
-    fun y2mp3() {
-        println(
-            youtubeToMp3(mkClient(), VideoID("v2soHxEN79c"), mkMoshi())
-        )
-    }
-
-    @Test
     fun youtube() {
         println(
-            audio(mkClient(), VideoID("v2soHxEN79c"), mkMoshi(), Player.BROWSER)
+            audio(mkClient(), VideoID("v2soHxEN79c"), Player.BROWSER)
         )
     }
 
     @Test
     fun badVideo() {
         println(
-            audio(mkClient(), VideoID("6G59zsjM2UI"), mkMoshi(), Player.BROWSER)
+            audio(mkClient(), VideoID("6G59zsjM2UI"), Player.BROWSER)
         )
     }
 
