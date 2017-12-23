@@ -59,10 +59,8 @@ fun enclosures(audio: Audio, url: HttpUrl): List<SyndEnclosureImpl> =
         }
     )
 
-fun entry(client: OkHttpClient, video: Video): SyndEntry? =
-    audio(client, video.id)?.let {
-        entry(video, it)
-    }
+fun entry(client: OkHttpClient, video: Video): SyndEntry =
+    entry(video, audio(client, video.id))
 
 fun entry(video: Video, audio: Audio): SyndEntryImpl =
     entry {
@@ -89,28 +87,28 @@ fun entry(video: Video, audio: Audio): SyndEntryImpl =
             it.value = video.description
         }
         it.publishedDate = video.publishedAt.toDate()
-}
-
-fun asFeed(client: OkHttpClient, yt: YouTube, videoID: VideoID): SyndFeed? =
-    audio(client, videoID)?.let { audio ->
-        val video = yt.videoInfo(videoID).toVideo(videoID)
-
-        rss20 {
-            it.modules = mutableListOf(
-                itunes {
-                    it.image = URL(video.thumbnails.best().url)
-                },
-                DCModuleImpl()
-            )
-
-            it.title = video.title
-            it.link = videoLink(videoID).toString()
-            it.description = video.description
-            it.publishedDate = video.publishedAt.toDate()
-            it.author = video.channelTitle
-            it.entries = listOf(entry(video, audio))
-        }
     }
+
+fun asFeed(client: OkHttpClient, yt: YouTube, videoID: VideoID): SyndFeed {
+
+    val video = yt.videoInfo(videoID).toVideo(videoID)
+
+    return rss20 {
+        it.modules = mutableListOf(
+            itunes {
+                it.image = URL(video.thumbnails.best().url)
+            },
+            DCModuleImpl()
+        )
+
+        it.title = video.title
+        it.link = videoLink(videoID).toString()
+        it.description = video.description
+        it.publishedDate = video.publishedAt.toDate()
+        it.author = video.channelTitle
+        it.entries = listOf(entry(video, audio(client, videoID)))
+    }
+}
 
 suspend fun asFeed(client: OkHttpClient, yt: YouTube, playlistID: PlaylistID): SyndFeed {
 

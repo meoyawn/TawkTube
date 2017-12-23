@@ -27,6 +27,8 @@ class Experiments {
 
     @Test
     fun whatthefuck() {
-        VideoID("1TN_Ig8sjxc")
+        println(
+            audio(mkClient(), VideoID("1TN_Ig8sjxc"), Player.BROWSER)
+        )
     }
 }

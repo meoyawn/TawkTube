@@ -64,7 +64,7 @@ fun playlistEntries(client: OkHttpClient, yt: YouTube, playlistID: PlaylistID): 
                     entry(client, it.snippet.toVideo())
                 }
             }
-            .mapNotNull {
+            .map {
                 it.await()
             }
     }

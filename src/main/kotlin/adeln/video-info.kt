@@ -30,9 +30,6 @@ data class Audio(
 fun Audio.sizeBytes(): Long =
     (lengthSeconds * bitrate / 8F).toLong()
 
-fun bitrate(length: Long, size: Long): Float =
-    (size * 8F) / length
-
 fun Audio.lengthMillis(): Long =
     lengthSeconds * 1000L
 
@@ -50,7 +47,7 @@ fun playerType(type: MimeType, player: Player): Boolean =
             "webm" !in type
     }
 
-fun audio(client: OkHttpClient, videoID: VideoID, player: Player = Player.OTHER): Audio? =
+fun audio(client: OkHttpClient, videoID: VideoID, player: Player = Player.OTHER): Audio =
     client.newCall(videoInfoRequest(videoID))
         .execute()
         .body()!!
@@ -80,6 +77,7 @@ fun audio(client: OkHttpClient, videoID: VideoID, player: Player = Player.OTHER)
 
             goodAudio(audios, player) ?: anyAudio(audios)
         }
+        ?: audio(client, FALLBACK, player)
 
 fun goodAudio(audios: List<Audio>?, player: Player): Audio? =
     audios
@@ -90,3 +88,5 @@ fun anyAudio(audios: List<Audio>?): Audio? =
     audios
         ?.filter { "audio" in it.type }
         ?.maxBy { it.bitrate }
+
+val FALLBACK = VideoID("OAQ7l33UF3E")
