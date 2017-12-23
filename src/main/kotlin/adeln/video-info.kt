@@ -59,7 +59,6 @@ fun audio(client: OkHttpClient, videoID: VideoID, player: Player = Player.OTHER)
         .let { map ->
             val audios = map["adaptive_fmts"]
                 ?.split(",")
-                ?.asSequence()
                 ?.map {
                     val m = it.split("&")
                         .asSequence()
@@ -73,7 +72,6 @@ fun audio(client: OkHttpClient, videoID: VideoID, player: Player = Player.OTHER)
                         lengthSeconds = map["length_seconds"]!!.toLong()
                     )
                 }
-                ?.toList()
 
             goodAudio(audios, player) ?: anyAudio(audios)
         }

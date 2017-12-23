@@ -19,16 +19,13 @@ class Experiments {
     }
 
     @Test
-    fun badVideo() {
-        println(
-            audio(mkClient(), VideoID("6G59zsjM2UI"), Player.BROWSER)
-        )
-    }
-
-    @Test
-    fun whatthefuck() {
-        println(
-            audio(mkClient(), VideoID("1TN_Ig8sjxc"), Player.BROWSER)
-        )
+    fun badVideos() {
+        listOf("6G59zsjM2UI", "1gYIGFr7zA8", "9qOQGBVedAQ", "1TN_Ig8sjxc")
+            .map(::VideoID)
+            .forEach {
+                println(
+                    audio(mkClient(), it, Player.BROWSER)
+                )
+            }
     }
 }
