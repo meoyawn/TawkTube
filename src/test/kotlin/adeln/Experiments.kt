@@ -1,5 +1,6 @@
 package adeln
 
+import kotlinx.coroutines.experimental.runBlocking
 import org.junit.Test
 
 class Experiments {
@@ -27,5 +28,12 @@ class Experiments {
                     audio(mkClient(), it, Player.BROWSER)
                 )
             }
+    }
+
+    @Test
+    fun badPlaylist() {
+        runBlocking {
+            println(asFeed(mkClient(), mkYoutube(), PlaylistID("PLdJo8g6QW5jboqKz4d6H3UawnFzJRH4hO")))
+        }
     }
 }

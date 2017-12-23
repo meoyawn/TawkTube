@@ -62,13 +62,16 @@ fun enclosures(audio: Audio, url: HttpUrl): List<SyndEnclosureImpl> =
 fun entry(client: OkHttpClient, video: Video): SyndEntry =
     entry(video, audio(client, video.id))
 
+fun Video.bestThumbnail(): URL? =
+    thumbnails?.let { URL(it.best().url) }
+
 fun entry(video: Video, audio: Audio): SyndEntryImpl =
     entry {
         val url = HttpUrl.parse("${Config.ADDR}/audio?v=${video.id.id}")!!
 
         it.modules = mutableListOf(
             itunesEntry { itunes ->
-                itunes.image = URL(video.thumbnails.best().url)
+                itunes.image = video.bestThumbnail()
                 itunes.duration = Duration(audio.lengthMillis())
                 video.position?.let {
                     itunes.order = it.toInt()
@@ -96,7 +99,7 @@ fun asFeed(client: OkHttpClient, yt: YouTube, videoID: VideoID): SyndFeed {
     return rss20 {
         it.modules = mutableListOf(
             itunes {
-                it.image = URL(video.thumbnails.best().url)
+                it.image = video.bestThumbnail()
             },
             DCModuleImpl()
         )

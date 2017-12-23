@@ -7,7 +7,7 @@ import com.google.api.services.youtube.model.VideoSnippet
 
 data class Video(
     val id: VideoID,
-    val thumbnails: ThumbnailDetails,
+    val thumbnails: ThumbnailDetails?,
     val position: Long?,
     val title: String,
     val channelTitle: String,
