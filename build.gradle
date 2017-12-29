@@ -25,7 +25,7 @@ repositories {
 dependencies {
     compile "org.jetbrains.kotlin:kotlin-stdlib-jre8:$kotlin_version"
     compile "org.jetbrains.kotlin:kotlin-reflect:$kotlin_version"
-    compile 'org.jetbrains.kotlinx:kotlinx-coroutines-core:0.21-alpha-2'
+    compile 'org.jetbrains.kotlinx:kotlinx-coroutines-core:0.21'
 
     compile group: 'com.squareup.okhttp3', name: 'okhttp', version: '3.9.1'
     compile group: 'com.squareup.moshi', name: 'moshi', version: '1.5.0'
@@ -36,6 +36,8 @@ dependencies {
     compile 'com.google.apis:google-api-services-youtube:v3-rev189-1.23.0'
 
     compile "org.jetbrains.ktor:ktor-netty:0.4.1-alpha-16"
+
+    compile 'com.yandex.android:disk-restapi-sdk:1.03'
 
     testCompile 'io.kotlintest:kotlintest:2.0.7'
 }

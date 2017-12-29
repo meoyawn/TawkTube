@@ -13,12 +13,10 @@ import com.google.api.services.youtube.model.ThumbnailDetails
 import com.google.api.services.youtube.model.VideoSnippet
 import com.rometools.rome.feed.synd.SyndEntry
 import kotlinx.coroutines.experimental.Deferred
-import kotlinx.coroutines.experimental.asCoroutineDispatcher
 import kotlinx.coroutines.experimental.async
 import okhttp3.HttpUrl
 import okhttp3.OkHttpClient
 import java.util.Date
-import java.util.concurrent.Executors
 
 data class VideoID(val id: String)
 data class PlaylistID(val id: String)
@@ -35,8 +33,6 @@ fun mkYoutube(): YouTube =
         .setApplicationName("TubeCast")
         .setYouTubeRequestInitializer(YouTubeRequestInitializer(Secrets.YT_KEY))
         .build()
-
-val BLOCKING_IO = Executors.newCachedThreadPool().asCoroutineDispatcher()
 
 fun ThumbnailDetails.best(): Thumbnail =
     asSequence()
@@ -95,5 +91,8 @@ fun YouTube.channel(id: ChannelID): Channel =
         .items
         .first()
         .let {
-            Channel(it.snippet, it.contentDetails)
+            Channel(
+                snippet = it.snippet,
+                contentDetails = it.contentDetails
+            )
         }

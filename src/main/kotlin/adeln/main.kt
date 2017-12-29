@@ -1,6 +1,7 @@
 package adeln
 
 import com.rometools.rome.io.SyndFeedOutput
+import okhttp3.HttpUrl
 import okhttp3.OkHttpClient
 import org.jetbrains.ktor.host.embeddedServer
 import org.jetbrains.ktor.http.HttpHeaders
@@ -9,7 +10,6 @@ import org.jetbrains.ktor.response.respondRedirect
 import org.jetbrains.ktor.response.respondWrite
 import org.jetbrains.ktor.routing.get
 import org.jetbrains.ktor.routing.routing
-import org.jetbrains.ktor.util.toMap
 
 object Secrets {
     val YT_KEY = "AIzaSyBXaU6RB0KwBFqEz5sdcyjXiNySefvUHLc"
@@ -29,6 +29,7 @@ fun main(args: Array<String>) {
     val client = mkClient()
     val youtube = mkYoutube()
     val output = SyndFeedOutput()
+    val yandexDisk = mkYandexDisk()
 
     val port = System.getenv("PORT")?.toInt() ?: 8080
 
@@ -57,18 +58,31 @@ fun main(args: Array<String>) {
             }
 
             get("/audio") {
-                val headers = call.request.headers
-                println(headers.toMap())
-
-                val player = headers[HttpHeaders.UserAgent]
-                    ?.startsWith("Mozilla/")
-                    .takeIf { it == true }
-                    ?.let { Player.BROWSER }
-                    ?: Player.OTHER
 
                 val videoId = VideoID(call.parameters["v"]!!)
+                val browser = call.request.headers[HttpHeaders.UserAgent]?.startsWith("Mozilla/") == true
+
+                val player =
+                    if (browser) Player.BROWSER
+                    else Player.OTHER
+
                 val audio = audio(client, videoId, player)
                 call.respondRedirect(audio.url.toString())
+            }
+
+            get("/yandexdisk/public") {
+                val url = HttpUrl.parse(call.parameters["link"]!!)!!
+                val feed = yandexDisk.asFeed(url)
+
+                call.respondWrite {
+                    output.output(feed, this)
+                }
+            }
+
+            get("/yandexdisk/audio") {
+                val publicKey = call.parameters["publicKey"]!!
+                val path = call.parameters["path"]!!
+                call.respondRedirect(yandexDisk.getPublicResourceDownloadLink(publicKey, path).href)
             }
         }
     }.start(wait = true)

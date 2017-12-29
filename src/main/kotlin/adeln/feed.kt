@@ -60,7 +60,7 @@ fun enclosures(audio: Audio, url: HttpUrl): List<SyndEnclosureImpl> =
     )
 
 fun entry(client: OkHttpClient, video: Video): SyndEntry =
-    entry(video, audio(client, video.id))
+    entry(video, audio = audio(client, video.id))
 
 fun Video.bestThumbnail(): URL? =
     thumbnails?.let { URL(it.best().url) }
