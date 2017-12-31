@@ -65,14 +65,14 @@ fun playlistEntries(client: OkHttpClient, yt: YouTube, playlistID: PlaylistID): 
             }
     }
 
-fun YouTube.playlistInfo(playlistID: PlaylistID): PlaylistSnippet =
+fun YouTube.playlistInfo(playlistID: PlaylistID): PlaylistSnippet? =
     playlists()
         .list("snippet")
         .setId(playlistID.id)
         .execute()
         .items
-        .first()
-        .snippet
+        .firstOrNull()
+        ?.snippet
 
 fun YouTube.videoInfo(id: VideoID): VideoSnippet =
     videos()

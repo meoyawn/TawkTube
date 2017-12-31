@@ -5,8 +5,10 @@ import okhttp3.HttpUrl
 import okhttp3.OkHttpClient
 import org.jetbrains.ktor.host.embeddedServer
 import org.jetbrains.ktor.http.HttpHeaders
+import org.jetbrains.ktor.http.HttpStatusCode
 import org.jetbrains.ktor.netty.Netty
 import org.jetbrains.ktor.response.respondRedirect
+import org.jetbrains.ktor.response.respondText
 import org.jetbrains.ktor.response.respondWrite
 import org.jetbrains.ktor.routing.get
 import org.jetbrains.ktor.routing.routing
@@ -52,9 +54,11 @@ fun main(args: Array<String>) {
 
                 val feed = asFeed(client, youtube, playlistId)
 
-                call.respondWrite {
-                    output.output(feed, this)
-                }
+                feed?.let {
+                    call.respondWrite {
+                        output.output(feed, this)
+                    }
+                } ?: call.respondText(status = HttpStatusCode.NotFound, text = "$playlistId does not exist")
             }
 
             get("/audio") {

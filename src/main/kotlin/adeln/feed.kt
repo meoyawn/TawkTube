@@ -113,9 +113,9 @@ fun asFeed(client: OkHttpClient, yt: YouTube, videoID: VideoID): SyndFeed {
     }
 }
 
-suspend fun asFeed(client: OkHttpClient, yt: YouTube, playlistID: PlaylistID): SyndFeed {
+suspend fun asFeed(client: OkHttpClient, yt: YouTube, playlistID: PlaylistID): SyndFeed? {
 
-    val playlist = yt.playlistInfo(playlistID)
+    val playlist = yt.playlistInfo(playlistID) ?: return null
 
     return rss20 {
         it.modules = mutableListOf(
