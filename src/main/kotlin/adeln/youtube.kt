@@ -22,11 +22,14 @@ data class VideoID(val id: String)
 data class PlaylistID(val id: String)
 data class ChannelID(val id: String)
 
-fun videoLink(videoID: VideoID): HttpUrl =
-    HttpUrl.parse("https://youtube.com/watch?v=${videoID.id}")!!
+fun link(id: VideoID): HttpUrl =
+    HttpUrl.parse("https://youtube.com/watch?v=${id.id}")!!
 
-fun playlistLink(playlistID: PlaylistID): HttpUrl =
-    HttpUrl.parse("https://youtube.com/playlist?list=${playlistID.id}")!!
+fun link(id: PlaylistID): HttpUrl =
+    HttpUrl.parse("https://youtube.com/playlist?list=${id.id}")!!
+
+fun link(id: ChannelID): HttpUrl =
+    HttpUrl.parse("https://youtube.com/channel/${id.id}")!!
 
 fun mkYoutube(): YouTube =
     YouTube.Builder(NetHttpTransport(), JacksonFactory()) {}
@@ -34,15 +37,15 @@ fun mkYoutube(): YouTube =
         .setYouTubeRequestInitializer(YouTubeRequestInitializer(Secrets.YT_KEY))
         .build()
 
-fun ThumbnailDetails.best(): Thumbnail =
+fun ThumbnailDetails.best(): Thumbnail? =
     asSequence()
         .map { (_, v) -> v as Thumbnail }
-        .maxBy { it.width }!!
+        .maxBy { it.width ?: Long.MIN_VALUE }
 
 fun DateTime.toDate(): Date =
     Date(value)
 
-data class Channel(
+data class YtChannel(
     val snippet: ChannelSnippet,
     val contentDetails: ChannelContentDetails
 )
@@ -83,7 +86,7 @@ fun YouTube.videoInfo(id: VideoID): VideoSnippet =
         .first()
         .snippet
 
-fun YouTube.channel(id: ChannelID): Channel =
+fun YouTube.channel(id: ChannelID): YtChannel =
     channels()
         .list("snippet,contentDetails")
         .setId(id.id)
@@ -91,7 +94,7 @@ fun YouTube.channel(id: ChannelID): Channel =
         .items
         .first()
         .let {
-            Channel(
+            YtChannel(
                 snippet = it.snippet,
                 contentDetails = it.contentDetails
             )

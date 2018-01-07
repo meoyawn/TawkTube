@@ -63,7 +63,7 @@ fun entry(client: OkHttpClient, video: Video): SyndEntry =
     entry(video, audio = audio(client, video.id))
 
 fun Video.bestThumbnail(): URL? =
-    thumbnails?.let { URL(it.best().url) }
+    thumbnails?.best()?.url.let { URL(it) }
 
 fun entry(video: Video, audio: Audio): SyndEntryImpl =
     entry {
@@ -76,6 +76,7 @@ fun entry(video: Video, audio: Audio): SyndEntryImpl =
                 video.position?.let {
                     itunes.order = it.toInt()
                 }
+                itunes.author = video.channelTitle
             },
             media(audio, url),
             DCModuleImpl()
@@ -84,7 +85,7 @@ fun entry(video: Video, audio: Audio): SyndEntryImpl =
         it.enclosures = enclosures(audio, url)
 
         it.title = video.title
-        it.link = videoLink(video.id).toString()
+        it.link = link(video.id).toString()
         it.author = video.channelTitle
         it.description = SyndContentImpl().also {
             it.value = video.description
@@ -100,12 +101,13 @@ fun asFeed(client: OkHttpClient, yt: YouTube, videoID: VideoID): SyndFeed {
         it.modules = mutableListOf(
             itunes {
                 it.image = video.bestThumbnail()
+                it.author = video.channelTitle
             },
             DCModuleImpl()
         )
 
         it.title = video.title
-        it.link = videoLink(videoID).toString()
+        it.link = link(videoID).toString()
         it.description = video.description
         it.publishedDate = video.publishedAt.toDate()
         it.author = video.channelTitle
@@ -120,16 +122,39 @@ suspend fun asFeed(client: OkHttpClient, yt: YouTube, playlistID: PlaylistID): S
     return rss20 {
         it.modules = mutableListOf(
             itunes {
-                it.image = URL(playlist.thumbnails.best().url)
+                it.image = playlist.thumbnails.best()?.url?.let { URL(it) }
+                it.author = playlist.channelTitle
             },
             DCModuleImpl()
         )
 
         it.title = playlist.title
-        it.link = playlistLink(playlistID).toString()
+        it.link = link(playlistID).toString()
         it.description = playlist.description
         it.publishedDate = playlist.publishedAt.toDate()
         it.author = playlist.channelTitle
         it.entries = playlistEntries(client, yt, playlistID).await()
+    }
+}
+
+suspend fun asFeed(client: OkHttpClient, yt: YouTube, channelID: ChannelID): SyndFeed? {
+
+    val (snippet, details) = yt.channel(channelID)
+
+    return rss20 {
+        it.modules = mutableListOf(
+            itunes {
+                it.image = snippet.thumbnails?.best()?.url?.let { URL(it) }
+                it.author = snippet.title
+            },
+            DCModuleImpl()
+        )
+
+        it.title = snippet.title
+        it.link = link(channelID).toString()
+        it.description = snippet.description
+        it.publishedDate = snippet.publishedAt.toDate()
+        it.author = snippet.title
+        it.entries = playlistEntries(client, yt, PlaylistID(details.relatedPlaylists.uploads)).await()
     }
 }

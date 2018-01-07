@@ -11,6 +11,7 @@ import org.jetbrains.ktor.response.respondRedirect
 import org.jetbrains.ktor.response.respondText
 import org.jetbrains.ktor.response.respondWrite
 import org.jetbrains.ktor.routing.get
+import org.jetbrains.ktor.routing.route
 import org.jetbrains.ktor.routing.routing
 
 object Secrets {
@@ -37,8 +38,14 @@ fun main(args: Array<String>) {
 
     embeddedServer(Netty, port = port) {
         routing {
-            get("/channel") {
+            get("/channel/{channelId}") {
+                val channelId = ChannelID(call.parameters["channelId"]!!)
 
+                val feed = asFeed(client, youtube, channelId)
+
+                call.respondWrite {
+                    output.output(feed, this)
+                }
             }
 
             get("/video") {
@@ -74,20 +81,24 @@ fun main(args: Array<String>) {
                 call.respondRedirect(audio.url.toString())
             }
 
-            get("/yandexdisk/public") {
-                val url = HttpUrl.parse(call.parameters["link"]!!)!!
-                val feed = yandexDisk.asFeed(url)
+            route("/yandexdisk") {
 
-                call.respondWrite {
-                    output.output(feed, this)
+                get("/public") {
+                    val url = HttpUrl.parse(call.parameters["link"]!!)!!
+                    val feed = yandexDisk.asFeed(url)
+
+                    call.respondWrite {
+                        output.output(feed, this)
+                    }
+                }
+
+                get("/audio") {
+                    val publicKey = call.parameters["publicKey"]!!
+                    val path = call.parameters["path"]!!
+                    call.respondRedirect(yandexDisk.getPublicResourceDownloadLink(publicKey, path).href)
                 }
             }
 
-            get("/yandexdisk/audio") {
-                val publicKey = call.parameters["publicKey"]!!
-                val path = call.parameters["path"]!!
-                call.respondRedirect(yandexDisk.getPublicResourceDownloadLink(publicKey, path).href)
-            }
         }
     }.start(wait = true)
 }

@@ -10,6 +10,10 @@ class Experiments {
         println(
             mkYoutube().channel(ChannelID("UCC3L8QaxqEGUiBC252GHy3w"))
         )
+
+        println(
+            mkYoutube().channel(ChannelID("UCFQ6Gptuq-sLflbJ4YY3Umw"))
+        )
     }
 
     @Test
