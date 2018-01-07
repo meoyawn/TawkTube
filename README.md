@@ -3,6 +3,8 @@ YouTube RSS [![CircleCI](https://circleci.com/gh/adelnizamutdinov/youtube-rss.sv
 
 ## Examples
 
+YT Channel https://limitless-atoll-85321.herokuapp.com/channel/UCFQ6Gptuq-sLflbJ4YY3Umw
+
 YT Playlist https://limitless-atoll-85321.herokuapp.com/playlist?list=PLE18841CABEA24090
 
 YT Video https://limitless-atoll-85321.herokuapp.com/video?v=R03hRZDpvsc
