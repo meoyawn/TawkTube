@@ -13,10 +13,12 @@ import com.google.api.services.youtube.model.ThumbnailDetails
 import com.google.api.services.youtube.model.VideoSnippet
 import com.rometools.rome.feed.synd.SyndEntry
 import kotlinx.coroutines.experimental.Deferred
+import kotlinx.coroutines.experimental.asCoroutineDispatcher
 import kotlinx.coroutines.experimental.async
 import okhttp3.HttpUrl
 import okhttp3.OkHttpClient
 import java.util.Date
+import java.util.concurrent.Executors
 
 data class VideoID(val id: String)
 data class PlaylistID(val id: String)
@@ -49,6 +51,8 @@ data class YtChannel(
     val snippet: ChannelSnippet,
     val contentDetails: ChannelContentDetails
 )
+
+val BLOCKING_IO = Executors.newCachedThreadPool().asCoroutineDispatcher()
 
 fun playlistEntries(client: OkHttpClient, yt: YouTube, playlistID: PlaylistID): Deferred<List<SyndEntry>> =
     async(BLOCKING_IO) {

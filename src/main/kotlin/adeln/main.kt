@@ -38,6 +38,10 @@ fun main(args: Array<String>) {
 
     embeddedServer(Netty, port = port) {
         routing {
+            get("/") {
+
+            }
+
             get("/channel/{channelId}") {
                 val channelId = ChannelID(call.parameters["channelId"]!!)
 

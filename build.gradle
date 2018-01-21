@@ -1,8 +1,12 @@
 version '1.0-SNAPSHOT'
 
 buildscript {
-    ext.kotlin_version = '1.2.10'
-    ext.rome_version = "1.9.0"
+
+    ext {
+        kotlin_version = '1.2.20'
+        rome_version = "1.9.0"
+        ktor_version = "0.4.1-alpha-16"
+    }
 
     repositories {
         jcenter()
@@ -25,7 +29,7 @@ repositories {
 dependencies {
     compile "org.jetbrains.kotlin:kotlin-stdlib-jre8:$kotlin_version"
     compile "org.jetbrains.kotlin:kotlin-reflect:$kotlin_version"
-    compile 'org.jetbrains.kotlinx:kotlinx-coroutines-core:0.21'
+    compile 'org.jetbrains.kotlinx:kotlinx-coroutines-core:0.21.2'
 
     compile group: 'com.squareup.okhttp3', name: 'okhttp', version: '3.9.1'
     compile group: 'com.squareup.moshi', name: 'moshi', version: '1.5.0'
@@ -33,13 +37,14 @@ dependencies {
     compile group: 'com.rometools', name: 'rome', version: rome_version
     compile group: 'com.rometools', name: 'rome-modules', version: rome_version
 
-    compile 'com.google.apis:google-api-services-youtube:v3-rev189-1.23.0'
+    compile 'com.google.apis:google-api-services-youtube:v3-rev190-1.23.0'
 
-    compile "org.jetbrains.ktor:ktor-netty:0.4.1-alpha-16"
+    compile "org.jetbrains.ktor:ktor-netty:$ktor_version"
+    compile "org.jetbrains.ktor:ktor-html-builder:$ktor_version"
 
     compile 'com.yandex.android:disk-restapi-sdk:1.03'
 
-    testCompile 'io.kotlintest:kotlintest:2.0.7'
+    testCompile('io.kotlintest:kotlintest:2.0.7')
 }
 
 compileKotlin {
