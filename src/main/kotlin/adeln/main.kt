@@ -6,18 +6,23 @@ import kotlinx.html.head
 import kotlinx.html.input
 import okhttp3.HttpUrl
 import okhttp3.OkHttpClient
+import okhttp3.Request
+import okio.Okio
+import org.jetbrains.ktor.cio.WriteChannel
+import org.jetbrains.ktor.cio.toOutputStream
+import org.jetbrains.ktor.content.FinalContent
 import org.jetbrains.ktor.host.embeddedServer
 import org.jetbrains.ktor.html.respondHtml
 import org.jetbrains.ktor.http.HttpHeaders
 import org.jetbrains.ktor.http.HttpStatusCode
 import org.jetbrains.ktor.netty.Netty
+import org.jetbrains.ktor.response.respond
 import org.jetbrains.ktor.response.respondRedirect
 import org.jetbrains.ktor.response.respondText
 import org.jetbrains.ktor.response.respondWrite
 import org.jetbrains.ktor.routing.get
 import org.jetbrains.ktor.routing.route
 import org.jetbrains.ktor.routing.routing
-import java.net.URLEncoder
 
 object Secrets {
     val YT_KEY = "AIzaSyBXaU6RB0KwBFqEz5sdcyjXiNySefvUHLc"
@@ -96,13 +101,24 @@ fun main(args: Array<String>) {
                     if (browser) Player.BROWSER
                     else Player.OTHER
 
-                println(player)
-
                 val audio = audio(client, videoId, player)
 
-                println(audio)
+                val req = Request.Builder()
+                    .url(audio.url)
+                    .build()
 
-                call.respondRedirect(URLEncoder.encode(audio.url.toString(), "UTF-8"))
+                val resp = client.newCall(req).await()
+                call.response.status(HttpStatusCode.fromValue(resp.code()))
+                call.response.okHeaders = resp.headers()
+                call.respond(object : FinalContent.WriteChannelContent() {
+                    suspend override fun writeTo(channel: WriteChannel) {
+                        Okio.buffer(Okio.sink(channel.toOutputStream())).use { sink ->
+                            resp.body()!!.source().use { src ->
+                                src.readAll(sink)
+                            }
+                        }
+                    }
+                })
             }
 
             route("/yandexdisk") {

@@ -59,6 +59,12 @@ kotlin {
     }
 }
 
+compileKotlin {
+    kotlinOptions {
+        jvmTarget = "1.8"
+    }
+}
+
 mainClassName = "adeln.MainKt"
 
 jar {
