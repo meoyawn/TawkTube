@@ -40,4 +40,11 @@ class Experiments {
             println(asFeed(mkClient(), mkYoutube(), PlaylistID("PLdJo8g6QW5jboqKz4d6H3UawnFzJRH4hO")))
         }
     }
+
+    @Test
+    fun badAudio() {
+        println(
+            audio(mkClient(), VideoID("iAst9D6js1g"), Player.BROWSER)
+        )
+    }
 }

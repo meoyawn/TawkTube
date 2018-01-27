@@ -1,9 +1,13 @@
 package adeln
 
 import com.rometools.rome.io.SyndFeedOutput
+import kotlinx.html.body
+import kotlinx.html.head
+import kotlinx.html.input
 import okhttp3.HttpUrl
 import okhttp3.OkHttpClient
 import org.jetbrains.ktor.host.embeddedServer
+import org.jetbrains.ktor.html.respondHtml
 import org.jetbrains.ktor.http.HttpHeaders
 import org.jetbrains.ktor.http.HttpStatusCode
 import org.jetbrains.ktor.netty.Netty
@@ -13,6 +17,7 @@ import org.jetbrains.ktor.response.respondWrite
 import org.jetbrains.ktor.routing.get
 import org.jetbrains.ktor.routing.route
 import org.jetbrains.ktor.routing.routing
+import java.net.URLEncoder
 
 object Secrets {
     val YT_KEY = "AIzaSyBXaU6RB0KwBFqEz5sdcyjXiNySefvUHLc"
@@ -38,8 +43,18 @@ fun main(args: Array<String>) {
 
     embeddedServer(Netty, port = port) {
         routing {
-            get("/") {
 
+            get("/") {
+                call.respondHtml {
+                    head {
+
+                    }
+                    body {
+                        input {
+
+                        }
+                    }
+                }
             }
 
             get("/channel/{channelId}") {
@@ -82,7 +97,7 @@ fun main(args: Array<String>) {
                     else Player.OTHER
 
                 val audio = audio(client, videoId, player)
-                call.respondRedirect(audio.url.toString())
+                call.respondRedirect(URLEncoder.encode(audio.url.toString(), "UTF-8"))
             }
 
             route("/yandexdisk") {
