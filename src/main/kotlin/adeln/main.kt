@@ -96,7 +96,12 @@ fun main(args: Array<String>) {
                     if (browser) Player.BROWSER
                     else Player.OTHER
 
+                println(player)
+
                 val audio = audio(client, videoId, player)
+
+                println(audio)
+
                 call.respondRedirect(URLEncoder.encode(audio.url.toString(), "UTF-8"))
             }
 
