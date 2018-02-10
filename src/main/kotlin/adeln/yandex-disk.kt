@@ -27,12 +27,15 @@ fun mkYandexDisk(): YandexDisk =
 
 enum class PreviewSize { XL }
 
-fun YandexDisk.listPublicResources(publicKey: String, previewSize: PreviewSize, previewCrop: Boolean): Resource =
+fun YandexDisk.listPublicResources(publicKey: String,
+                                   previewSize: PreviewSize,
+                                   previewCrop: Boolean,
+                                   limit: Int): Resource =
     listPublicResources(
         publicKey,
         null,
         null,
-        Int.MAX_VALUE,
+        limit,
         null,
         null,
         previewSize.name,
@@ -68,7 +71,8 @@ fun YandexDisk.asFeed(url: HttpUrl): SyndFeedImpl =
         val dir = listPublicResources(
             publicKey = url.toString(),
             previewSize = PreviewSize.XL,
-            previewCrop = true
+            previewCrop = true,
+            limit = Int.MAX_VALUE
         )
         val files = dir.resourceList.items
 
