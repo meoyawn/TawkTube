@@ -1,6 +1,7 @@
 package adeln
 
 import com.rometools.rome.io.SyndFeedOutput
+import kotlinx.html.HTML
 import kotlinx.html.a
 import kotlinx.html.body
 import kotlinx.html.form
@@ -53,46 +54,7 @@ fun main(args: Array<String>) {
                 val resolved = url?.let { HttpUrl.parse(it) }?.let { resolve(it) }?.toString()
 
                 call.respondHtml {
-                    body {
-
-                        h1 { +"YouTube to audio podcast converter" }
-
-                        p { +"Paste a link to a:" }
-
-                        ul {
-                            li { +"youtube video" }
-                            li { +"youtube playlist" }
-                            li { +"youtube channel" }
-                            li { +"yandex disk public folder" }
-                        }
-
-                        form(action = "/") {
-                            input(name = "url") {
-                                size = "100"
-                                url?.let { value = it }
-                            }
-                        }
-
-                        when {
-                            url != null && resolved != null -> {
-
-                                p { +"Here's your podcast:" }
-
-                                a(href = resolved) { +resolved }
-                            }
-
-                            url != null && resolved == null ->
-                                p {
-                                    +"Failed to resolve that url. You can ping me on "
-
-                                    a(href = "https://twitter.com/meoyawn") { +"twitter" }
-                                }
-                        }
-
-                        p {
-                            a(href = "https://github.com/adelnizamutdinov/youtube-rss") { +"Source code" }
-                        }
-                    }
+                    renderHome(url, resolved)
                 }
             }
 
@@ -161,3 +123,51 @@ fun main(args: Array<String>) {
         }
     }.start(wait = true)
 }
+
+private fun HTML.renderHome(url: String?, resolved: String?): Unit =
+    body {
+
+        h1 { +"YouTube to audio podcast converter" }
+
+        p { +"Paste a link to a:" }
+
+        ul {
+            li { +"youtube video" }
+            li { +"youtube playlist" }
+            li { +"youtube channel" }
+            li { +"yandex disk public folder" }
+        }
+
+        form(action = "/") {
+            input(name = "url") {
+                size = "100"
+                url?.let { value = it }
+            }
+        }
+
+        when {
+            url != null && resolved != null -> {
+
+                p { +"Here's your podcast:" }
+
+                a(href = resolved) { +resolved }
+
+                p {
+                    +"You can listen to it using "
+
+                    a(href = "https://pocketcasts.com/submit") { +"Pocketcasts" }
+                }
+            }
+
+            url != null && resolved == null ->
+                p {
+                    +"Failed to resolve that url. You can ping me on "
+
+                    a(href = "https://twitter.com/meoyawn") { +"twitter" }
+                }
+        }
+
+        p {
+            a(href = "https://github.com/adelnizamutdinov/youtube-rss") { +"Source code" }
+        }
+    }
