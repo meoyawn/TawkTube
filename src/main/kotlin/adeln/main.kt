@@ -89,7 +89,9 @@ fun main(args: Array<String>) {
                                 }
                         }
 
-                        a(href = "https://github.com/adelnizamutdinov/youtube-rss") { +"Source code" }
+                        p {
+                            a(href = "https://github.com/adelnizamutdinov/youtube-rss") { +"Source code" }
+                        }
                     }
                 }
             }
