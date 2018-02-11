@@ -135,7 +135,7 @@ private fun HTML.renderHome(url: String?, resolved: String?): Unit =
             li { +"youtube video" }
             li { +"youtube playlist" }
             li { +"youtube channel" }
-            li { +"yandex disk public folder" }
+            li { +"yandex disk public folder with your audiobook" }
         }
 
         form(action = "/") {
