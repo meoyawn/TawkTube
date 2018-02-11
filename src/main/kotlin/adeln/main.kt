@@ -155,7 +155,7 @@ private fun HTML.renderHome(url: String?, resolved: String?): Unit =
                 p {
                     +"You can listen to it using "
 
-                    a(href = "https://pocketcasts.com/submit") { +"Pocketcasts" }
+                    a(href = "https://pocketcasts.com/submit") { +"Pocket Casts" }
                 }
             }
 
