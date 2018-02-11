@@ -67,7 +67,8 @@ fun Video.bestThumbnail(): URL? =
 
 fun entry(video: Video, audio: Audio): SyndEntryImpl =
     entry {
-        val url = HttpUrl.parse("${Config.ADDR}/audio?v=${video.id.id}")!!
+        val videoID = video.id
+        val url = audioUrl(videoID)
 
         it.modules = mutableListOf(
             itunesEntry { itunes ->
@@ -85,13 +86,19 @@ fun entry(video: Video, audio: Audio): SyndEntryImpl =
         it.enclosures = enclosures(audio, url)
 
         it.title = video.title
-        it.link = link(video.id).toString()
+        it.link = link(videoID).toString()
         it.author = video.channelTitle
         it.description = SyndContentImpl().also {
             it.value = video.description
         }
         it.publishedDate = video.publishedAt.toDate()
     }
+
+fun audioUrl(videoID: VideoID): HttpUrl =
+    Config.ADDR.newBuilder()
+        .addPathSegment("audio")
+        .addQueryParameter("v", videoID.id)
+        .build()
 
 fun asFeed(client: OkHttpClient, yt: YouTube, videoID: VideoID): SyndFeed {
 

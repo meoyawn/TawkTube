@@ -61,4 +61,9 @@ class Experiments {
         resolve(HttpUrl.parse("https://www.youtube.com/watch?v=g2tyOLvArw0")!!) shouldEqual
             HttpUrl.parse("https://limitless-atoll-85321.herokuapp.com/video?v=g2tyOLvArw0")
     }
+
+    @Test
+    fun audioUrl() {
+        audioUrl(VideoID("ha")) shouldEqual HttpUrl.parse("https://limitless-atoll-85321.herokuapp.com/audio?v=ha")
+    }
 }
