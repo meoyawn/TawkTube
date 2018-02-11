@@ -4,7 +4,7 @@ import okhttp3.HttpUrl
 
 fun resolve(url: HttpUrl): HttpUrl? =
     when (url.host()) {
-        "youtube.com" ->
+        "youtube.com", "www.youtube.com" ->
             resolveYt(url)
 
         "youtu.be" ->

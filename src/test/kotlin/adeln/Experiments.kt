@@ -52,7 +52,13 @@ class Experiments {
 
     @Test
     fun disk() {
-        buildYaDisk(HttpUrl.parse("https://yadi.sk/d/I5HDo-VY3R4Bvn")!!) shouldEqual
+        resolve(HttpUrl.parse("https://yadi.sk/d/I5HDo-VY3R4Bvn")!!) shouldEqual
             HttpUrl.parse("https://limitless-atoll-85321.herokuapp.com/yandexdisk/public?link=https://yadi.sk/d/I5HDo-VY3R4Bvn")
+    }
+
+    @Test
+    fun video() {
+        resolve(HttpUrl.parse("https://www.youtube.com/watch?v=g2tyOLvArw0")!!) shouldEqual
+            HttpUrl.parse("https://limitless-atoll-85321.herokuapp.com/video?v=g2tyOLvArw0")
     }
 }
