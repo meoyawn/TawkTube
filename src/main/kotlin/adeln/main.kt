@@ -59,9 +59,19 @@ fun main(args: Array<String>) {
             }
 
             get("/channel/{channelId}") {
-                val channelId = ChannelID(call.parameters["channelId"]!!)
+                val channelId = ChannelId.ById(call.parameters["channelId"]!!)
 
                 val feed = asFeed(client, youtube, channelId)
+
+                call.respondWrite {
+                    output.output(feed, this)
+                }
+            }
+
+            get("/user/{username}") {
+                val username = ChannelId.ByName(call.parameters["username"]!!)
+
+                val feed = asFeed(client, youtube, username)
 
                 call.respondWrite {
                     output.output(feed, this)

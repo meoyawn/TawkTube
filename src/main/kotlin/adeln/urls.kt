@@ -30,7 +30,8 @@ fun buildYaDisk(url: HttpUrl): HttpUrl =
 fun resolveYt(url: HttpUrl): HttpUrl? =
     url.queryParameter("v")?.takeIf(String::isNotBlank)?.let { buildVideo(VideoID(it)) }
         ?: url.queryParameter("list")?.takeIf(String::isNotBlank)?.let { buildPlaylist(PlaylistID(it)) }
-        ?: url.pathSegments()?.takeIf { "channel" in it }?.last()?.takeIf(String::isNotBlank)?.let { buildChannel(ChannelID(it)) }
+        ?: url.pathSegments()?.takeIf { "channel" in it }?.last()?.takeIf(String::isNotBlank)?.let { buildChannel(ChannelId.ById(it)) }
+        ?: url.pathSegments()?.takeIf { "user" in it }?.last()?.takeIf(String::isNotBlank)?.let { buildUser(ChannelId.ByName(it)) }
 
 fun buildVideo(videoID: VideoID): HttpUrl =
     Config.ADDR.newBuilder()
@@ -44,8 +45,14 @@ fun buildPlaylist(playlistID: PlaylistID): HttpUrl =
         .addQueryParameter("list", playlistID.id)
         .build()
 
-fun buildChannel(channelID: ChannelID): HttpUrl =
+fun buildChannel(channelID: ChannelId.ById): HttpUrl =
     Config.ADDR.newBuilder()
         .addPathSegment("channel")
         .addPathSegment(channelID.id)
+        .build()
+
+fun buildUser(username: ChannelId.ByName): HttpUrl =
+    Config.ADDR.newBuilder()
+        .addPathSegment("user")
+        .addPathSegment(username.name)
         .build()

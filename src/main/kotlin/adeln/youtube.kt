@@ -21,8 +21,13 @@ import java.util.Date
 import java.util.concurrent.Executors
 
 data class VideoID(val id: String)
+
 data class PlaylistID(val id: String)
-data class ChannelID(val id: String)
+
+sealed class ChannelId {
+    data class ById(val id: String) : ChannelId()
+    data class ByName(val name: String) : ChannelId()
+}
 
 fun link(id: VideoID): HttpUrl =
     HttpUrl.parse("https://youtube.com/watch?v=${id.id}")!!
@@ -30,8 +35,14 @@ fun link(id: VideoID): HttpUrl =
 fun link(id: PlaylistID): HttpUrl =
     HttpUrl.parse("https://youtube.com/playlist?list=${id.id}")!!
 
-fun link(id: ChannelID): HttpUrl =
-    HttpUrl.parse("https://youtube.com/channel/${id.id}")!!
+fun link(channel: ChannelId): HttpUrl =
+    when (channel) {
+        is ChannelId.ById ->
+            "https://youtube.com/channel/${channel.id}"
+
+        is ChannelId.ByName ->
+            "https://youtube.com/user/${channel.name}"
+    }.let { HttpUrl.parse(it)!! }
 
 fun mkYoutube(): YouTube =
     YouTube.Builder(NetHttpTransport(), JacksonFactory()) {}
@@ -90,10 +101,18 @@ fun YouTube.videoInfo(id: VideoID): VideoSnippet =
         .first()
         .snippet
 
-fun YouTube.channel(id: ChannelID): YtChannel =
+fun YouTube.channel(channel: ChannelId): YtChannel =
     channels()
         .list("snippet,contentDetails")
-        .setId(id.id)
+        .run {
+            when (channel) {
+                is ChannelId.ById ->
+                    setId(channel.id)
+
+                is ChannelId.ByName ->
+                    setForUsername(channel.name)
+            }
+        }
         .execute()
         .items
         .first()

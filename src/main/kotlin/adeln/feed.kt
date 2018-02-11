@@ -144,7 +144,7 @@ suspend fun asFeed(client: OkHttpClient, yt: YouTube, playlistID: PlaylistID): S
     }
 }
 
-suspend fun asFeed(client: OkHttpClient, yt: YouTube, channelID: ChannelID): SyndFeed? {
+suspend fun asFeed(client: OkHttpClient, yt: YouTube, channelID: adeln.ChannelId): SyndFeed? {
 
     val (snippet, details) = yt.channel(channelID)
 
