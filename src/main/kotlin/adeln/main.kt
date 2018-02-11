@@ -12,12 +12,10 @@ import org.jetbrains.ktor.html.respondHtml
 import org.jetbrains.ktor.http.HttpHeaders
 import org.jetbrains.ktor.http.HttpStatusCode
 import org.jetbrains.ktor.netty.Netty
-import org.jetbrains.ktor.pipeline.PipelineContext
 import org.jetbrains.ktor.response.respondRedirect
 import org.jetbrains.ktor.response.respondText
 import org.jetbrains.ktor.response.respondWrite
 import org.jetbrains.ktor.routing.get
-import org.jetbrains.ktor.routing.post
 import org.jetbrains.ktor.routing.route
 import org.jetbrains.ktor.routing.routing
 
@@ -26,26 +24,13 @@ object Secrets {
 }
 
 object Config {
-    val ADDR = "https://limitless-atoll-85321.herokuapp.com"
+    val ADDR = HttpUrl.parse("https://limitless-atoll-85321.herokuapp.com")!!
 }
 
 fun mkClient(): OkHttpClient =
     OkHttpClient.Builder()
         .followRedirects(true)
         .build()
-
-private suspend fun PipelineContext<Unit>.renderHome(resolved: String? = null): Unit =
-    call.respondHtml {
-        body {
-            form(action = "/") {
-                input(name = "url")
-            }
-
-            resolved?.let {
-                a(href = it) { +it }
-            }
-        }
-    }
 
 fun main(args: Array<String>) {
 
@@ -60,13 +45,21 @@ fun main(args: Array<String>) {
         routing {
 
             get("/") {
-                renderHome()
-            }
+                val url = call.parameters["url"]
 
-            post("/") {
-                val url = call.parameters["url"]!!
-                val parsed = HttpUrl.parse(url)
-                renderHome(url)
+                val resolved = url?.let { HttpUrl.parse(it) }?.let { resolve(it) }?.toString()
+
+                call.respondHtml {
+                    body {
+                        form(action = "/") {
+                            input(name = "url")
+                        }
+
+                        resolved?.let {
+                            a(href = it) { +it }
+                        }
+                    }
+                }
             }
 
             get("/channel/{channelId}") {

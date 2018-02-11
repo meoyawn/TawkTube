@@ -1,6 +1,8 @@
 package adeln
 
+import io.kotlintest.matchers.shouldEqual
 import kotlinx.coroutines.experimental.runBlocking
+import okhttp3.HttpUrl
 import org.junit.Test
 
 class Experiments {
@@ -46,5 +48,11 @@ class Experiments {
         println(
             audio(mkClient(), VideoID("iAst9D6js1g"), Player.BROWSER)
         )
+    }
+
+    @Test
+    fun disk() {
+        buildYaDisk(HttpUrl.parse("https://yadi.sk/d/I5HDo-VY3R4Bvn")!!) shouldEqual
+            HttpUrl.parse("https://limitless-atoll-85321.herokuapp.com/yandexdisk/public?link=https://yadi.sk/d/I5HDo-VY3R4Bvn")
     }
 }

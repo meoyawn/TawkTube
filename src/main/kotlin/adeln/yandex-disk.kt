@@ -45,7 +45,7 @@ fun YandexDisk.listPublicResources(publicKey: String,
 fun asEntry(res: Resource): SyndEntryImpl =
     entry {
 
-        val url = HttpUrl.parse(Config.ADDR)!!.newBuilder()
+        val url = Config.ADDR.newBuilder()
             .addPathSegments("yandexdisk/audio")
             .addQueryParameter("publicKey", res.publicKey)
             .addQueryParameter("path", res.path.path)
