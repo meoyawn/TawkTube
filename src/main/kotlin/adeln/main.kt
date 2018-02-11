@@ -25,7 +25,7 @@ import org.jetbrains.ktor.routing.route
 import org.jetbrains.ktor.routing.routing
 
 object Secrets {
-    val YT_KEY = "AIzaSyBXaU6RB0KwBFqEz5sdcyjXiNySefvUHLc"
+    const val YT_KEY = "AIzaSyBXaU6RB0KwBFqEz5sdcyjXiNySefvUHLc"
 }
 
 object Config {
