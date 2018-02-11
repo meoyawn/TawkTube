@@ -4,7 +4,11 @@ import com.rometools.rome.io.SyndFeedOutput
 import kotlinx.html.a
 import kotlinx.html.body
 import kotlinx.html.form
+import kotlinx.html.h1
 import kotlinx.html.input
+import kotlinx.html.li
+import kotlinx.html.p
+import kotlinx.html.ul
 import okhttp3.HttpUrl
 import okhttp3.OkHttpClient
 import org.jetbrains.ktor.host.embeddedServer
@@ -46,18 +50,46 @@ fun main(args: Array<String>) {
 
             get("/") {
                 val url = call.parameters["url"]
-
                 val resolved = url?.let { HttpUrl.parse(it) }?.let { resolve(it) }?.toString()
 
                 call.respondHtml {
                     body {
-                        form(action = "/") {
-                            input(name = "url")
+
+                        h1 { +"YouTube to audio podcast converter" }
+
+                        p { +"Paste a link to a:" }
+
+                        ul {
+                            li { +"youtube video" }
+                            li { +"youtube playlist" }
+                            li { +"youtube channel" }
+                            li { +"yandex disk public folder" }
                         }
 
-                        resolved?.let {
-                            a(href = it) { +it }
+                        form(action = "/") {
+                            input(name = "url") {
+                                size = "100"
+                                url?.let { value = it }
+                            }
                         }
+
+                        when {
+                            url != null && resolved != null -> {
+
+                                p { +"Here's your podcast:" }
+
+                                a(href = resolved) { +resolved }
+                            }
+
+                            url != null && resolved == null ->
+                                p {
+                                    +"Failed to resolve that url. You can ping me on "
+
+                                    a(href = "https://twitter.com/meoyawn") { +"twitter" }
+                                }
+                        }
+
+                        a(href = "https://github.com/adelnizamutdinov/youtube-rss") { +"Source code" }
                     }
                 }
             }
