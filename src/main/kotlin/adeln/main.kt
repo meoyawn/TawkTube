@@ -1,8 +1,9 @@
 package adeln
 
 import com.rometools.rome.io.SyndFeedOutput
+import kotlinx.html.a
 import kotlinx.html.body
-import kotlinx.html.head
+import kotlinx.html.form
 import kotlinx.html.input
 import okhttp3.HttpUrl
 import okhttp3.OkHttpClient
@@ -11,10 +12,12 @@ import org.jetbrains.ktor.html.respondHtml
 import org.jetbrains.ktor.http.HttpHeaders
 import org.jetbrains.ktor.http.HttpStatusCode
 import org.jetbrains.ktor.netty.Netty
+import org.jetbrains.ktor.pipeline.PipelineContext
 import org.jetbrains.ktor.response.respondRedirect
 import org.jetbrains.ktor.response.respondText
 import org.jetbrains.ktor.response.respondWrite
 import org.jetbrains.ktor.routing.get
+import org.jetbrains.ktor.routing.post
 import org.jetbrains.ktor.routing.route
 import org.jetbrains.ktor.routing.routing
 
@@ -31,6 +34,19 @@ fun mkClient(): OkHttpClient =
         .followRedirects(true)
         .build()
 
+private suspend fun PipelineContext<Unit>.renderHome(resolved: String? = null): Unit =
+    call.respondHtml {
+        body {
+            form(action = "/") {
+                input(name = "url")
+            }
+
+            resolved?.let {
+                a(href = it) { +it }
+            }
+        }
+    }
+
 fun main(args: Array<String>) {
 
     val client = mkClient()
@@ -44,16 +60,13 @@ fun main(args: Array<String>) {
         routing {
 
             get("/") {
-                call.respondHtml {
-                    head {
+                renderHome()
+            }
 
-                    }
-                    body {
-                        input {
-
-                        }
-                    }
-                }
+            post("/") {
+                val url = call.parameters["url"]!!
+                val parsed = HttpUrl.parse(url)
+                renderHome(url)
             }
 
             get("/channel/{channelId}") {
