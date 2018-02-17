@@ -1,6 +1,18 @@
 package adeln
 
 import com.rometools.rome.io.SyndFeedOutput
+import io.ktor.application.call
+import io.ktor.html.respondHtml
+import io.ktor.http.HttpHeaders
+import io.ktor.http.HttpStatusCode
+import io.ktor.response.respondRedirect
+import io.ktor.response.respondText
+import io.ktor.response.respondWrite
+import io.ktor.routing.get
+import io.ktor.routing.route
+import io.ktor.routing.routing
+import io.ktor.server.engine.embeddedServer
+import io.ktor.server.netty.Netty
 import kotlinx.html.HTML
 import kotlinx.html.a
 import kotlinx.html.body
@@ -12,17 +24,7 @@ import kotlinx.html.p
 import kotlinx.html.ul
 import okhttp3.HttpUrl
 import okhttp3.OkHttpClient
-import org.jetbrains.ktor.host.embeddedServer
-import org.jetbrains.ktor.html.respondHtml
-import org.jetbrains.ktor.http.HttpHeaders
-import org.jetbrains.ktor.http.HttpStatusCode
-import org.jetbrains.ktor.netty.Netty
-import org.jetbrains.ktor.response.respondRedirect
-import org.jetbrains.ktor.response.respondText
-import org.jetbrains.ktor.response.respondWrite
-import org.jetbrains.ktor.routing.get
-import org.jetbrains.ktor.routing.route
-import org.jetbrains.ktor.routing.routing
+
 
 object Secrets {
     const val YT_KEY = "AIzaSyBXaU6RB0KwBFqEz5sdcyjXiNySefvUHLc"

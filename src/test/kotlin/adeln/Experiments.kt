@@ -66,4 +66,9 @@ class Experiments {
     fun audioUrl() {
         audioUrl(VideoID("ha")) shouldEqual HttpUrl.parse("https://limitless-atoll-85321.herokuapp.com/audio?v=ha")
     }
+
+    @Test
+    fun recursiveFolder() {
+        println(mkYandexDisk().recursiveResource("https://yadi.sk/d/EtEGI2fZ3SQUGS").size)
+    }
 }

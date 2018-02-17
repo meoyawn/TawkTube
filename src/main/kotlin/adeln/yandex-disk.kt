@@ -28,12 +28,13 @@ fun mkYandexDisk(): YandexDisk =
 enum class PreviewSize { XL }
 
 fun YandexDisk.listPublicResources(publicKey: String,
-                                   previewSize: PreviewSize,
-                                   previewCrop: Boolean,
-                                   limit: Int): Resource =
+                                   path: String? = null,
+                                   previewSize: PreviewSize = PreviewSize.XL,
+                                   previewCrop: Boolean = true,
+                                   limit: Int = Int.MAX_VALUE): Resource =
     listPublicResources(
         publicKey,
-        null,
+        path,
         null,
         limit,
         null,
@@ -41,6 +42,20 @@ fun YandexDisk.listPublicResources(publicKey: String,
         previewSize.name,
         previewCrop
     )
+
+data class ParentedResource(
+    val parent: Resource?,
+    val resource: Resource
+)
+
+fun YandexDisk.recursiveResource(publicKey: String, parent: Resource? = null): List<ParentedResource> {
+
+    val items = listPublicResources(publicKey = publicKey, path = parent?.path?.path).resourceList.items
+
+    val flat = items.filter { !it.isDir }.map { ParentedResource(parent, it) }
+
+    return flat + items.filter { it.isDir }.flatMap { recursiveResource(it.publicKey, it) }
+}
 
 fun asEntry(res: Resource): SyndEntryImpl =
     entry {
@@ -57,7 +72,6 @@ fun asEntry(res: Resource): SyndEntryImpl =
             SyndEnclosureImpl().also {
                 it.type = res.mimeType
                 it.url = url.toString()
-//                it.length = audio.sizeBytes()
             }
         )
 
@@ -68,12 +82,7 @@ fun asEntry(res: Resource): SyndEntryImpl =
 
 fun YandexDisk.asFeed(url: HttpUrl): SyndFeedImpl =
     rss20 {
-        val dir = listPublicResources(
-            publicKey = url.toString(),
-            previewSize = PreviewSize.XL,
-            previewCrop = true,
-            limit = Int.MAX_VALUE
-        )
+        val dir = listPublicResources(publicKey = url.toString())
         val files = dir.resourceList.items
 
         it.modules = mutableListOf(

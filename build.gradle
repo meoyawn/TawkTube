@@ -5,7 +5,7 @@ buildscript {
     ext {
         kotlin_version = '1.2.21'
         rome_version = "1.9.0"
-        ktor_version = "0.4.1-alpha-16"
+        ktor_version = "0.9.1"
     }
 
     repositories {
@@ -23,11 +23,12 @@ apply plugin: "application"
 
 repositories {
     jcenter()
-    maven { url "https://dl.bintray.com/kotlin/ktor" }
+    maven { url "http://dl.bintray.com/kotlin/ktor" }
+    maven { url "https://dl.bintray.com/kotlin/kotlinx" }
 }
 
 dependencies {
-    compile "org.jetbrains.kotlin:kotlin-stdlib-jre8:$kotlin_version"
+    compile "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
     compile "org.jetbrains.kotlin:kotlin-reflect:$kotlin_version"
     compile 'org.jetbrains.kotlinx:kotlinx-coroutines-core:0.22.2'
 
@@ -39,8 +40,9 @@ dependencies {
 
     compile 'com.google.apis:google-api-services-youtube:v3-rev192-1.23.0'
 
-    compile "org.jetbrains.ktor:ktor-netty:$ktor_version"
-    compile "org.jetbrains.ktor:ktor-html-builder:$ktor_version"
+    compile "io.ktor:ktor-server-netty:$ktor_version"
+    compile "io.ktor:ktor-html-builder:$ktor_version"
+    compile "io.ktor:ktor-client-core:$ktor_version"
 
     compile 'com.yandex.android:disk-restapi-sdk:1.03'
 
