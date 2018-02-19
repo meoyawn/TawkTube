@@ -71,4 +71,10 @@ class Experiments {
     fun recursiveFolder() {
         println(mkYandexDisk().recursiveResource("https://yadi.sk/d/EtEGI2fZ3SQUGS").size)
     }
+
+    @Test
+    fun mobileYt() {
+        resolve(HttpUrl.parse("https://m.youtube.com/playlist?list=PLE7DDD91010BC51F8")!!) shouldEqual
+            HttpUrl.parse("https://limitless-atoll-85321.herokuapp.com/playlist?list=PLE7DDD91010BC51F8")
+    }
 }
