@@ -69,7 +69,7 @@ class Experiments {
 
     @Test
     fun recursiveFolder() {
-        println(mkYandexDisk().recursiveResource("https://yadi.sk/d/EtEGI2fZ3SQUGS").size)
+        println(mkYandexDisk().recursiveResource("https://yadi.sk/d/EtEGI2fZ3SQUGS").files.map { it.pathToTitle() })
     }
 
     @Test

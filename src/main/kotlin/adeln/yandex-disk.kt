@@ -9,6 +9,7 @@ import com.yandex.disk.rest.OkHttpClientFactory
 import com.yandex.disk.rest.json.Resource
 import com.yandex.disk.rest.retrofit.CloudApi
 import com.yandex.disk.rest.retrofit.ErrorHandlerImpl
+import com.yandex.disk.rest.util.ResourcePath
 import okhttp3.HttpUrl
 import retrofit.RestAdapter
 import retrofit.client.OkClient
@@ -28,13 +29,13 @@ fun mkYandexDisk(): YandexDisk =
 enum class PreviewSize { XL }
 
 fun YandexDisk.listPublicResources(publicKey: String,
-                                   path: String? = null,
+                                   path: ResourcePath? = null,
                                    previewSize: PreviewSize = PreviewSize.XL,
                                    previewCrop: Boolean = true,
                                    limit: Int = Int.MAX_VALUE): Resource =
     listPublicResources(
         publicKey,
-        path,
+        path?.path,
         null,
         limit,
         null,
@@ -43,19 +44,27 @@ fun YandexDisk.listPublicResources(publicKey: String,
         previewCrop
     )
 
-data class ParentedResource(
-    val parent: Resource?,
-    val resource: Resource
+operator fun <T> ((T) -> Boolean).not(): (T) -> Boolean =
+    { !invoke(it) }
+
+data class RecursiveFolder(
+    val dir: Resource,
+    val files: List<Resource>
 )
 
-fun YandexDisk.recursiveResource(publicKey: String, parent: Resource? = null): List<ParentedResource> {
+fun YandexDisk.recursiveResource(publicKey: String, parent: Resource? = null): RecursiveFolder {
 
-    val items = listPublicResources(publicKey = publicKey, path = parent?.path?.path).resourceList.items
+    val dir = listPublicResources(publicKey = publicKey, path = parent?.path)
 
-    val flat = items.filter { !it.isDir }.map { ParentedResource(parent, it) }
+    val items = dir.resourceList.items
+    val deepFiles = items.filter(Resource::isDir).flatMap { recursiveResource(it.publicKey, it).files }
+    val flatFiles = items.filter(!Resource::isDir)
 
-    return flat + items.filter { it.isDir }.flatMap { recursiveResource(it.publicKey, it) }
+    return RecursiveFolder(dir = dir, files = deepFiles + flatFiles)
 }
+
+fun Resource.pathToTitle(): String =
+    path.path.replace(oldValue = "/", newValue = " ").trim()
 
 fun asEntry(res: Resource): SyndEntryImpl =
     entry {
@@ -75,15 +84,14 @@ fun asEntry(res: Resource): SyndEntryImpl =
             }
         )
 
-        it.title = res.name
+        it.title = res.path.path
         it.link = res.publicUrl
         it.publishedDate = res.created
     }
 
 fun YandexDisk.asFeed(url: HttpUrl): SyndFeedImpl =
     rss20 {
-        val dir = listPublicResources(publicKey = url.toString())
-        val files = dir.resourceList.items
+        val (dir, files) = recursiveResource(publicKey = url.toString())
 
         it.modules = mutableListOf(
             itunes {
@@ -92,7 +100,7 @@ fun YandexDisk.asFeed(url: HttpUrl): SyndFeedImpl =
             DCModuleImpl()
         )
 
-        it.title = dir.name
+        it.title = dir.pathToTitle()
         it.description = dir.publicUrl
         it.link = dir.publicUrl
         it.publishedDate = dir.created
