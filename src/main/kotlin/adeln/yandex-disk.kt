@@ -84,7 +84,7 @@ fun asEntry(res: Resource): SyndEntryImpl =
             }
         )
 
-        it.title = res.path.path
+        it.title = res.pathToTitle()
         it.link = res.publicUrl
         it.publishedDate = res.created
     }
@@ -100,7 +100,7 @@ fun YandexDisk.asFeed(url: HttpUrl): SyndFeedImpl =
             DCModuleImpl()
         )
 
-        it.title = dir.pathToTitle()
+        it.title = dir.name
         it.description = dir.publicUrl
         it.link = dir.publicUrl
         it.publishedDate = dir.created
