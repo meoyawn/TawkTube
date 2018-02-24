@@ -169,7 +169,7 @@ private fun HTML.renderHome(url: String?, resolved: String?): Unit =
 
                     a(href = "https://pocketcasts.com/submit") { +"Pocket Casts" }
 
-                    +", or "
+                    +" or "
 
                     a(href = "https://player.fm/importer/feed") { +"Player FM" }
                 }
