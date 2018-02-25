@@ -31,7 +31,8 @@ object Secrets {
 }
 
 object Config {
-    val ADDR = HttpUrl.parse("https://limitless-atoll-85321.herokuapp.com")!!
+    val PORT = System.getenv("PORT")?.toInt() ?: 8080
+    val ADDR = HttpUrl.parse(System.getenv("HEROKU_URL") ?: "http://localhost:$PORT")!!
 }
 
 fun mkClient(): OkHttpClient =
@@ -48,9 +49,7 @@ fun main(args: Array<String>) {
     val output = SyndFeedOutput()
     val yandexDisk = mkYandexDisk()
 
-    val port = System.getenv("PORT")?.toInt() ?: 8080
-
-    embeddedServer(Netty, port = port) {
+    embeddedServer(Netty, port = Config.PORT) {
         routing {
 
             get("/") {

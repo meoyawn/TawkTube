@@ -53,18 +53,18 @@ class Experiments {
     @Test
     fun disk() {
         resolve(HttpUrl.parse("https://yadi.sk/d/I5HDo-VY3R4Bvn")!!) shouldEqual
-            HttpUrl.parse("https://limitless-atoll-85321.herokuapp.com/yandexdisk/public?link=https://yadi.sk/d/I5HDo-VY3R4Bvn")
+            HttpUrl.parse("http://localhost:8080/yandexdisk/public?link=https://yadi.sk/d/I5HDo-VY3R4Bvn")
     }
 
     @Test
     fun video() {
         resolve(HttpUrl.parse("https://www.youtube.com/watch?v=g2tyOLvArw0")!!) shouldEqual
-            HttpUrl.parse("https://limitless-atoll-85321.herokuapp.com/video?v=g2tyOLvArw0")
+            HttpUrl.parse("http://localhost:8080/video?v=g2tyOLvArw0")
     }
 
     @Test
     fun audioUrl() {
-        audioUrl(VideoID("ha")) shouldEqual HttpUrl.parse("https://limitless-atoll-85321.herokuapp.com/audio?v=ha")
+        audioUrl(VideoID("ha")) shouldEqual HttpUrl.parse("http://localhost:8080/audio?v=ha")
     }
 
     @Test
@@ -75,6 +75,6 @@ class Experiments {
     @Test
     fun mobileYt() {
         resolve(HttpUrl.parse("https://m.youtube.com/playlist?list=PLE7DDD91010BC51F8")!!) shouldEqual
-            HttpUrl.parse("https://limitless-atoll-85321.herokuapp.com/playlist?list=PLE7DDD91010BC51F8")
+            HttpUrl.parse("http://localhost:8080/playlist?list=PLE7DDD91010BC51F8")
     }
 }
