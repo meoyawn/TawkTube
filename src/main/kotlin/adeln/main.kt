@@ -41,6 +41,8 @@ fun mkClient(): OkHttpClient =
 
 fun main(args: Array<String>) {
 
+    println(System.getenv("APP_NAME"))
+
     val client = mkClient()
     val youtube = mkYoutube()
     val output = SyndFeedOutput()
