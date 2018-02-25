@@ -41,7 +41,7 @@ fun mkClient(): OkHttpClient =
 
 fun main(args: Array<String>) {
 
-    println(System.getenv("APP_NAME"))
+    println("env\n${System.getenv()}")
 
     val client = mkClient()
     val youtube = mkYoutube()
