@@ -5,6 +5,7 @@ import io.ktor.application.call
 import io.ktor.html.respondHtml
 import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpStatusCode
+import io.ktor.request.ApplicationRequest
 import io.ktor.response.respondRedirect
 import io.ktor.response.respondText
 import io.ktor.response.respondWrite
@@ -104,10 +105,9 @@ fun main(args: Array<String>) {
             get("/audio") {
 
                 val videoId = VideoID(call.parameters["v"]!!)
-                val browser = call.request.headers[HttpHeaders.UserAgent]?.startsWith("Mozilla/") == true
 
                 val player =
-                    if (browser) Player.BROWSER
+                    if (call.request.isBrowser()) Player.BROWSER
                     else Player.OTHER
 
                 val audio = audio(client, videoId, player)
@@ -136,6 +136,9 @@ fun main(args: Array<String>) {
         }
     }.start(wait = true)
 }
+
+fun ApplicationRequest.isBrowser(): Boolean =
+    headers[HttpHeaders.UserAgent]?.startsWith("Mozilla") == true
 
 private fun HTML.renderHome(url: String?, resolved: String?): Unit =
     body {
