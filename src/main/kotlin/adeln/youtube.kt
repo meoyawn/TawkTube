@@ -68,7 +68,8 @@ fun DateTime.toDate(): Date =
 fun playlistEntries(yt: YouTube, playlistID: PlaylistID, player: Player): List<SyndEntry> {
     val full = paging<PlaylistVideos, String>(
         load = { yt.playlistVideos(playlistID, pageToken = it) },
-        nextPage = { it.items.nextPageToken }
+        nextPage = { it.items.nextPageToken },
+        limit = 20
     )
 
     val items = full.flatMap { it.items.items }
