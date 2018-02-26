@@ -1,5 +1,6 @@
 package adeln
 
+import io.kotlintest.matchers.shouldBe
 import io.kotlintest.matchers.shouldEqual
 import kotlinx.coroutines.experimental.runBlocking
 import okhttp3.HttpUrl
@@ -76,5 +77,13 @@ class Experiments {
     fun mobileYt() {
         resolve(HttpUrl.parse("https://m.youtube.com/playlist?list=PLE7DDD91010BC51F8")!!) shouldEqual
             HttpUrl.parse("http://localhost:8080/playlist?list=PLE7DDD91010BC51F8")
+    }
+
+    @Test
+    fun durations() {
+        mkYoutube().playlistItems(PlaylistID("PLE7DDD91010BC51F8")).all {
+            println(it.contentDetails)
+            it.contentDetails.endAt != null
+        } shouldBe true
     }
 }

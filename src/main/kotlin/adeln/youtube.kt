@@ -7,9 +7,11 @@ import com.google.api.services.youtube.YouTube
 import com.google.api.services.youtube.YouTubeRequestInitializer
 import com.google.api.services.youtube.model.ChannelContentDetails
 import com.google.api.services.youtube.model.ChannelSnippet
+import com.google.api.services.youtube.model.PlaylistItemSnippet
 import com.google.api.services.youtube.model.PlaylistSnippet
 import com.google.api.services.youtube.model.Thumbnail
 import com.google.api.services.youtube.model.ThumbnailDetails
+import com.google.api.services.youtube.model.VideoContentDetails
 import com.google.api.services.youtube.model.VideoSnippet
 import com.rometools.rome.feed.synd.SyndEntry
 import kotlinx.coroutines.experimental.Deferred
@@ -67,21 +69,25 @@ val BLOCKING_IO = Executors.newCachedThreadPool().asCoroutineDispatcher()
 
 fun playlistEntries(client: OkHttpClient, yt: YouTube, playlistID: PlaylistID): Deferred<List<SyndEntry>> =
     async(BLOCKING_IO) {
-        yt.playlistItems()
-            .list("snippet")
-            .setPlaylistId(playlistID.id)
-            .setMaxResults(50)
-            .execute()
-            .items
+        yt.playlistItems(playlistID)
             .map {
                 async(BLOCKING_IO) {
-                    entry(client, it.snippet.toVideo())
+                    entry(client, it.toVideo())
                 }
             }
             .map {
                 it.await()
             }
     }
+
+fun YouTube.playlistItems(playlistID: PlaylistID): List<PlaylistItemSnippet> =
+    playlistItems()
+        .list("snippet")
+        .setPlaylistId(playlistID.id)
+        .setMaxResults(50)
+        .execute()
+        .items
+        .map { it.snippet }
 
 fun YouTube.playlistInfo(playlistID: PlaylistID): PlaylistSnippet? =
     playlists()
@@ -100,6 +106,15 @@ fun YouTube.videoInfo(id: VideoID): VideoSnippet =
         .items
         .first()
         .snippet
+
+fun YouTube.videos(ids: List<VideoID>): List<VideoContentDetails> =
+    videos()
+        .list("contentDetails")
+        .setId(ids.joinToString(separator = ",") { it.id })
+        .setMaxResults(50)
+        .execute()
+        .items
+        .map { it.contentDetails }
 
 fun YouTube.channel(channel: ChannelId): YtChannel =
     channels()
