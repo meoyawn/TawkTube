@@ -112,6 +112,8 @@ fun main(args: Array<String>) {
 
                 val audio = audio(client, videoId, player)
 
+                println("got audio $audio")
+
                 call.respondRedirect(audio.url.toString())
             }
 
