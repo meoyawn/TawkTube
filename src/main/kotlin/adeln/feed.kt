@@ -1,6 +1,7 @@
 package adeln
 
 import com.google.api.services.youtube.YouTube
+import com.google.api.services.youtube.model.VideoContentDetails
 import com.rometools.modules.itunes.EntryInformationImpl
 import com.rometools.modules.itunes.FeedInformationImpl
 import com.rometools.modules.itunes.types.Duration
@@ -11,13 +12,11 @@ import com.rometools.rome.feed.module.DCModuleImpl
 import com.rometools.rome.feed.rss.Channel
 import com.rometools.rome.feed.synd.SyndContentImpl
 import com.rometools.rome.feed.synd.SyndEnclosureImpl
-import com.rometools.rome.feed.synd.SyndEntry
 import com.rometools.rome.feed.synd.SyndEntryImpl
 import com.rometools.rome.feed.synd.SyndFeed
 import com.rometools.rome.feed.synd.SyndFeedImpl
 import com.rometools.rome.io.impl.RSS20Generator
 import okhttp3.HttpUrl
-import okhttp3.OkHttpClient
 import java.net.URL
 
 inline fun itunesEntry(f: (EntryInformationImpl) -> Unit): EntryInformationImpl =
@@ -38,52 +37,41 @@ inline fun rss20(f: (SyndFeedImpl) -> Unit): SyndFeedImpl =
 inline fun itunes(f: (FeedInformationImpl) -> Unit): FeedInformationImpl =
     FeedInformationImpl().also(f)
 
-fun media(audio: Audio, url: HttpUrl): MediaEntryModuleImpl =
-    mediaEntry {
-        it.mediaContents = arrayOf(
-            mediaContent(url) {
-                it.duration = audio.lengthSeconds
-                it.bitrate = audio.bitrate
-                it.type = audio.type
-                it.fileSize = audio.sizeBytes()
-            }
-        )
-    }
-
-fun enclosures(audio: Audio, url: HttpUrl): List<SyndEnclosureImpl> =
-    listOf(
-        SyndEnclosureImpl().also {
-            it.type = audio.type
-            it.url = url.toString()
-            it.length = audio.sizeBytes()
-        }
-    )
-
-fun entry(client: OkHttpClient, video: Video): SyndEntry =
-    entry(video, audio = audio(client, video.id))
 
 fun Video.bestThumbnail(): URL? =
     thumbnails?.best()?.url.let { URL(it) }
 
-fun entry(video: Video, audio: Audio): SyndEntryImpl =
+fun entry(video: Video, audio: VideoContentDetails): SyndEntryImpl =
     entry {
         val videoID = video.id
         val url = audioUrl(videoID)
 
+        val duration = java.time.Duration.parse(audio.duration)
+
         it.modules = mutableListOf(
             itunesEntry { itunes ->
                 itunes.image = video.bestThumbnail()
-                itunes.duration = Duration(audio.lengthMillis())
+                itunes.duration = Duration(duration.toMillis())
                 video.position?.let {
                     itunes.order = it.toInt()
                 }
                 itunes.author = video.channelTitle
             },
-            media(audio, url),
+            mediaEntry {
+                it.mediaContents = arrayOf(
+                    mediaContent(url) {
+                        it.duration = duration.seconds
+                    }
+                )
+            },
             DCModuleImpl()
         )
 
-        it.enclosures = enclosures(audio, url)
+        it.enclosures = listOf(
+            SyndEnclosureImpl().also {
+                it.url = url.toString()
+            }
+        )
 
         it.title = video.title
         it.link = link(videoID).toString()
@@ -100,9 +88,10 @@ fun audioUrl(videoID: VideoID): HttpUrl =
         .addQueryParameter("v", videoID.id)
         .build()
 
-fun asFeed(client: OkHttpClient, yt: YouTube, videoID: VideoID): SyndFeed {
+fun asFeed(yt: YouTube, videoID: VideoID): SyndFeed {
 
-    val video = yt.videoInfo(videoID).toVideo(videoID)
+    val (snippet, audio) = yt.videoInfo(videoID)
+    val video = snippet.toVideo(videoID)
 
     return rss20 {
         it.modules = mutableListOf(
@@ -118,11 +107,11 @@ fun asFeed(client: OkHttpClient, yt: YouTube, videoID: VideoID): SyndFeed {
         it.description = video.description
         it.publishedDate = video.publishedAt.toDate()
         it.author = video.channelTitle
-        it.entries = listOf(entry(video, audio(client, videoID)))
+        it.entries = listOf(entry(video, audio))
     }
 }
 
-suspend fun asFeed(client: OkHttpClient, yt: YouTube, playlistID: PlaylistID): SyndFeed? {
+fun asFeed(yt: YouTube, playlistID: PlaylistID): SyndFeed? {
 
     val playlist = yt.playlistInfo(playlistID) ?: return null
 
@@ -140,11 +129,11 @@ suspend fun asFeed(client: OkHttpClient, yt: YouTube, playlistID: PlaylistID): S
         it.description = playlist.description
         it.publishedDate = playlist.publishedAt.toDate()
         it.author = playlist.channelTitle
-        it.entries = playlistEntries(client, yt, playlistID).await()
+        it.entries = playlistEntries(yt, playlistID)
     }
 }
 
-suspend fun asFeed(client: OkHttpClient, yt: YouTube, channelID: adeln.ChannelId): SyndFeed? {
+fun asFeed(yt: YouTube, channelID: ChannelId): SyndFeed? {
 
     val (snippet, details) = yt.channel(channelID)
 
@@ -162,6 +151,6 @@ suspend fun asFeed(client: OkHttpClient, yt: YouTube, channelID: adeln.ChannelId
         it.description = snippet.description
         it.publishedDate = snippet.publishedAt.toDate()
         it.author = snippet.title
-        it.entries = playlistEntries(client, yt, PlaylistID(details.relatedPlaylists.uploads)).await()
+        it.entries = playlistEntries(yt, PlaylistID(details.relatedPlaylists.uploads))
     }
 }

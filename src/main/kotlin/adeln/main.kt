@@ -65,7 +65,7 @@ fun main(args: Array<String>) {
             get("/channel/{channelId}") {
                 val channelId = ChannelId.ById(call.parameters["channelId"]!!)
 
-                val feed = asFeed(client, youtube, channelId)
+                val feed = asFeed(youtube, channelId)
 
                 call.respondWrite {
                     output.output(feed, this)
@@ -75,7 +75,7 @@ fun main(args: Array<String>) {
             get("/user/{username}") {
                 val username = ChannelId.ByName(call.parameters["username"]!!)
 
-                val feed = asFeed(client, youtube, username)
+                val feed = asFeed(youtube, username)
 
                 call.respondWrite {
                     output.output(feed, this)
@@ -86,14 +86,14 @@ fun main(args: Array<String>) {
                 val videoId = VideoID(call.parameters["v"]!!)
 
                 call.respondWrite {
-                    output.output(asFeed(client, youtube, videoId), this)
+                    output.output(asFeed(youtube, videoId), this)
                 }
             }
 
             get("/playlist") {
                 val playlistId = PlaylistID(call.parameters["list"]!!)
 
-                val feed = asFeed(client, youtube, playlistId)
+                val feed = asFeed(youtube, playlistId)
 
                 feed?.let {
                     call.respondWrite {

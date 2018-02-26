@@ -14,13 +14,8 @@ import com.google.api.services.youtube.model.ThumbnailDetails
 import com.google.api.services.youtube.model.VideoContentDetails
 import com.google.api.services.youtube.model.VideoSnippet
 import com.rometools.rome.feed.synd.SyndEntry
-import kotlinx.coroutines.experimental.Deferred
-import kotlinx.coroutines.experimental.asCoroutineDispatcher
-import kotlinx.coroutines.experimental.async
 import okhttp3.HttpUrl
-import okhttp3.OkHttpClient
 import java.util.Date
-import java.util.concurrent.Executors
 
 data class VideoID(val id: String)
 
@@ -65,20 +60,16 @@ data class YtChannel(
     val contentDetails: ChannelContentDetails
 )
 
-val BLOCKING_IO = Executors.newCachedThreadPool().asCoroutineDispatcher()
+data class YtVideo(
+    val snippet: VideoSnippet,
+    val contentDetails: VideoContentDetails
+)
 
-fun playlistEntries(client: OkHttpClient, yt: YouTube, playlistID: PlaylistID): Deferred<List<SyndEntry>> =
-    async(BLOCKING_IO) {
-        yt.playlistItems(playlistID)
-            .map {
-                async(BLOCKING_IO) {
-                    entry(client, it.toVideo())
-                }
-            }
-            .map {
-                it.await()
-            }
-    }
+fun playlistEntries(yt: YouTube, playlistID: PlaylistID): List<SyndEntry> {
+    val snippets = yt.playlistItems(playlistID)
+    val details = yt.videos(snippets.map { VideoID(it.resourceId.videoId) })
+    return snippets.zip(details) { snippet, detail -> entry(snippet.toVideo(), detail) }
+}
 
 fun YouTube.playlistItems(playlistID: PlaylistID): List<PlaylistItemSnippet> =
     playlistItems()
@@ -98,14 +89,14 @@ fun YouTube.playlistInfo(playlistID: PlaylistID): PlaylistSnippet? =
         .firstOrNull()
         ?.snippet
 
-fun YouTube.videoInfo(id: VideoID): VideoSnippet =
+fun YouTube.videoInfo(id: VideoID): YtVideo =
     videos()
-        .list("snippet")
+        .list("snippet,contentDetails")
         .setId(id.id)
         .execute()
         .items
         .first()
-        .snippet
+        .let { YtVideo(snippet = it.snippet, contentDetails = it.contentDetails) }
 
 fun YouTube.videos(ids: List<VideoID>): List<VideoContentDetails> =
     videos()
@@ -131,9 +122,4 @@ fun YouTube.channel(channel: ChannelId): YtChannel =
         .execute()
         .items
         .first()
-        .let {
-            YtChannel(
-                snippet = it.snippet,
-                contentDetails = it.contentDetails
-            )
-        }
+        .let { YtChannel(snippet = it.snippet, contentDetails = it.contentDetails) }

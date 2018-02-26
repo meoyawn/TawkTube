@@ -27,12 +27,6 @@ data class Audio(
     val lengthSeconds: Long
 )
 
-fun Audio.sizeBytes(): Long =
-    (lengthSeconds * bitrate / 8F).toLong()
-
-fun Audio.lengthMillis(): Long =
-    lengthSeconds * 1000L
-
 enum class Player {
     BROWSER,
     OTHER,
