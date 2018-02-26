@@ -65,10 +65,10 @@ data class YtVideo(
     val contentDetails: VideoContentDetails
 )
 
-fun playlistEntries(yt: YouTube, playlistID: PlaylistID): List<SyndEntry> {
+fun playlistEntries(yt: YouTube, playlistID: PlaylistID, player: Player): List<SyndEntry> {
     val snippets = yt.playlistItems(playlistID)
     val details = yt.videos(snippets.map { VideoID(it.resourceId.videoId) })
-    return snippets.zip(details) { snippet, detail -> entry(snippet.toVideo(), detail) }
+    return snippets.zip(details) { snippet, detail -> entry(snippet.toVideo(), detail, player) }
 }
 
 fun YouTube.playlistItems(playlistID: PlaylistID): List<PlaylistItemSnippet> =

@@ -65,7 +65,7 @@ fun main(args: Array<String>) {
             get("/channel/{channelId}") {
                 val channelId = ChannelId.ById(call.parameters["channelId"]!!)
 
-                val feed = asFeed(youtube, channelId)
+                val feed = asFeed(youtube, channelId, call.request.player())
 
                 call.respondWrite {
                     output.output(feed, this)
@@ -75,7 +75,7 @@ fun main(args: Array<String>) {
             get("/user/{username}") {
                 val username = ChannelId.ByName(call.parameters["username"]!!)
 
-                val feed = asFeed(youtube, username)
+                val feed = asFeed(youtube, username, call.request.player())
 
                 call.respondWrite {
                     output.output(feed, this)
@@ -86,14 +86,14 @@ fun main(args: Array<String>) {
                 val videoId = VideoID(call.parameters["v"]!!)
 
                 call.respondWrite {
-                    output.output(asFeed(youtube, videoId), this)
+                    output.output(asFeed(youtube, videoId, call.request.player()), this)
                 }
             }
 
             get("/playlist") {
                 val playlistId = PlaylistID(call.parameters["list"]!!)
 
-                val feed = asFeed(youtube, playlistId)
+                val feed = asFeed(youtube, playlistId, call.request.player())
 
                 feed?.let {
                     call.respondWrite {
@@ -141,6 +141,10 @@ fun main(args: Array<String>) {
 
 fun ApplicationRequest.isBrowser(): Boolean =
     headers[HttpHeaders.UserAgent]?.startsWith("Mozilla") == true
+
+fun ApplicationRequest.player(): Player =
+    if (isBrowser()) Player.BROWSER
+    else Player.OTHER
 
 private fun HTML.renderHome(url: String?, resolved: String?): Unit =
     body {

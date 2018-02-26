@@ -41,7 +41,7 @@ inline fun itunes(f: (FeedInformationImpl) -> Unit): FeedInformationImpl =
 fun Video.bestThumbnail(): URL? =
     thumbnails?.best()?.url.let { URL(it) }
 
-fun entry(video: Video, audio: VideoContentDetails): SyndEntryImpl =
+fun entry(video: Video, audio: VideoContentDetails, player: Player): SyndEntryImpl =
     entry {
         val videoID = video.id
         val url = audioUrl(videoID)
@@ -70,6 +70,7 @@ fun entry(video: Video, audio: VideoContentDetails): SyndEntryImpl =
         it.enclosures = listOf(
             SyndEnclosureImpl().also {
                 it.url = url.toString()
+                it.type = player.audioType()
             }
         )
 
@@ -88,7 +89,7 @@ fun audioUrl(videoID: VideoID): HttpUrl =
         .addQueryParameter("v", videoID.id)
         .build()
 
-fun asFeed(yt: YouTube, videoID: VideoID): SyndFeed {
+fun asFeed(yt: YouTube, videoID: VideoID, player: Player): SyndFeed {
 
     val (snippet, audio) = yt.videoInfo(videoID)
     val video = snippet.toVideo(videoID)
@@ -107,11 +108,11 @@ fun asFeed(yt: YouTube, videoID: VideoID): SyndFeed {
         it.description = video.description
         it.publishedDate = video.publishedAt.toDate()
         it.author = video.channelTitle
-        it.entries = listOf(entry(video, audio))
+        it.entries = listOf(entry(video, audio, player))
     }
 }
 
-fun asFeed(yt: YouTube, playlistID: PlaylistID): SyndFeed? {
+fun asFeed(yt: YouTube, playlistID: PlaylistID, player: Player): SyndFeed? {
 
     val playlist = yt.playlistInfo(playlistID) ?: return null
 
@@ -129,11 +130,11 @@ fun asFeed(yt: YouTube, playlistID: PlaylistID): SyndFeed? {
         it.description = playlist.description
         it.publishedDate = playlist.publishedAt.toDate()
         it.author = playlist.channelTitle
-        it.entries = playlistEntries(yt, playlistID)
+        it.entries = playlistEntries(yt, playlistID, player)
     }
 }
 
-fun asFeed(yt: YouTube, channelID: ChannelId): SyndFeed? {
+fun asFeed(yt: YouTube, channelID: ChannelId, player: Player): SyndFeed? {
 
     val (snippet, details) = yt.channel(channelID)
 
@@ -151,6 +152,6 @@ fun asFeed(yt: YouTube, channelID: ChannelId): SyndFeed? {
         it.description = snippet.description
         it.publishedDate = snippet.publishedAt.toDate()
         it.author = snippet.title
-        it.entries = playlistEntries(yt, PlaylistID(details.relatedPlaylists.uploads))
+        it.entries = playlistEntries(yt, PlaylistID(details.relatedPlaylists.uploads), player)
     }
 }

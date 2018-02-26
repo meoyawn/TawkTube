@@ -39,7 +39,7 @@ class Experiments {
     @Test
     fun badPlaylist() {
         runBlocking {
-            println(asFeed(mkYoutube(), PlaylistID("PLdJo8g6QW5jboqKz4d6H3UawnFzJRH4hO")))
+            println(asFeed(mkYoutube(), PlaylistID("PLdJo8g6QW5jboqKz4d6H3UawnFzJRH4hO"), Player.BROWSER))
         }
     }
 
