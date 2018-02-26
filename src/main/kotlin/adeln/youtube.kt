@@ -7,7 +7,7 @@ import com.google.api.services.youtube.YouTube
 import com.google.api.services.youtube.YouTubeRequestInitializer
 import com.google.api.services.youtube.model.ChannelContentDetails
 import com.google.api.services.youtube.model.ChannelSnippet
-import com.google.api.services.youtube.model.PlaylistItemSnippet
+import com.google.api.services.youtube.model.PlaylistItemListResponse
 import com.google.api.services.youtube.model.PlaylistSnippet
 import com.google.api.services.youtube.model.Thumbnail
 import com.google.api.services.youtube.model.ThumbnailDetails
@@ -25,6 +25,16 @@ sealed class ChannelId {
     data class ById(val id: String) : ChannelId()
     data class ByName(val name: String) : ChannelId()
 }
+
+data class YtChannel(
+    val snippet: ChannelSnippet,
+    val contentDetails: ChannelContentDetails
+)
+
+data class YtVideo(
+    val snippet: VideoSnippet,
+    val contentDetails: VideoContentDetails
+)
 
 fun link(id: VideoID): HttpUrl =
     HttpUrl.parse("https://youtube.com/watch?v=${id.id}")!!
@@ -55,39 +65,45 @@ fun ThumbnailDetails.best(): Thumbnail? =
 fun DateTime.toDate(): Date =
     Date(value)
 
-data class YtChannel(
-    val snippet: ChannelSnippet,
-    val contentDetails: ChannelContentDetails
-)
-
-data class YtVideo(
-    val snippet: VideoSnippet,
-    val contentDetails: VideoContentDetails
-)
-
 fun playlistEntries(yt: YouTube, playlistID: PlaylistID, player: Player): List<SyndEntry> {
-    val snippets = yt.playlistItems(playlistID)
-    val details = yt.videos(snippets.map { VideoID(it.resourceId.videoId) })
-    return snippets.zip(details) { snippet, detail -> entry(snippet.toVideo(), detail, player) }
+    val full = paging<PlaylistVideos, String>(
+        load = { yt.playlistVideos(playlistID, pageToken = it) },
+        nextPage = { it.items.nextPageToken }
+    )
+
+    val items = full.flatMap { it.items.items }
+    val details = full.flatMap { it.videos }
+
+    return items.zip(details) { snippet, detail -> entry(snippet.snippet.toVideo(), detail, player) }
 }
 
-fun YouTube.playlistItems(playlistID: PlaylistID): List<PlaylistItemSnippet> =
+private fun YouTube.playlistItems(playlistID: PlaylistID, pageToken: String?): PlaylistItemListResponse =
     playlistItems()
         .list("snippet")
         .setPlaylistId(playlistID.id)
         .setMaxResults(50)
+        .setPageToken(pageToken)
         .execute()
-        .items
-        .map { it.snippet }
 
-fun YouTube.playlistInfo(playlistID: PlaylistID): PlaylistSnippet? =
+data class PlaylistVideos(
+    val items: PlaylistItemListResponse,
+    val videos: List<VideoContentDetails>
+)
+
+fun YouTube.playlistVideos(playlistID: PlaylistID, pageToken: String?): PlaylistVideos {
+    val items = playlistItems(playlistID, pageToken)
+    val videos = videos(items.items.map { VideoID(it.snippet.resourceId.videoId) })
+    return PlaylistVideos(items, videos)
+}
+
+fun YouTube.playlistInfo(playlistID: PlaylistID): PlaylistSnippet =
     playlists()
         .list("snippet")
         .setId(playlistID.id)
         .execute()
         .items
-        .firstOrNull()
-        ?.snippet
+        .first()
+        .snippet
 
 fun YouTube.videoInfo(id: VideoID): YtVideo =
     videos()

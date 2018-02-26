@@ -5,8 +5,10 @@ import okhttp3.OkHttpClient
 import okhttp3.Request
 import java.net.URLDecoder
 
+val GET_VIDEO_INFO = HttpUrl.parse("http://www.youtube.com/get_video_info")!!
+
 fun videoInfoUrl(videoID: VideoID): HttpUrl =
-    HttpUrl.parse("http://www.youtube.com/get_video_info")!!.newBuilder()
+    GET_VIDEO_INFO.newBuilder()
         .setQueryParameter("video_id", videoID.id)
         .build()
 
@@ -47,7 +49,7 @@ fun playerType(type: MimeType, player: Player): Boolean =
             "webm" !in type
     }
 
-fun audio(client: OkHttpClient, videoID: VideoID, player: Player = Player.OTHER): Audio =
+fun audio(client: OkHttpClient, videoID: VideoID, player: Player): Audio =
     client.newCall(videoInfoRequest(videoID))
         .execute()
         .body()!!

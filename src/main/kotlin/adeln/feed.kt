@@ -12,6 +12,7 @@ import com.rometools.rome.feed.module.DCModuleImpl
 import com.rometools.rome.feed.rss.Channel
 import com.rometools.rome.feed.synd.SyndContentImpl
 import com.rometools.rome.feed.synd.SyndEnclosureImpl
+import com.rometools.rome.feed.synd.SyndEntry
 import com.rometools.rome.feed.synd.SyndEntryImpl
 import com.rometools.rome.feed.synd.SyndFeed
 import com.rometools.rome.feed.synd.SyndFeedImpl
@@ -41,7 +42,7 @@ inline fun itunes(f: (FeedInformationImpl) -> Unit): FeedInformationImpl =
 fun Video.bestThumbnail(): URL? =
     thumbnails?.best()?.url.let { URL(it) }
 
-fun entry(video: Video, audio: VideoContentDetails, player: Player): SyndEntryImpl =
+fun entry(video: Video, audio: VideoContentDetails, player: Player): SyndEntry =
     entry {
         val videoID = video.id
         val url = audioUrl(videoID)
@@ -89,12 +90,11 @@ fun audioUrl(videoID: VideoID): HttpUrl =
         .addQueryParameter("v", videoID.id)
         .build()
 
-fun asFeed(yt: YouTube, videoID: VideoID, player: Player): SyndFeed {
+fun asFeed(yt: YouTube, videoID: VideoID, player: Player): SyndFeed =
+    rss20 {
+        val (snippet, audio) = yt.videoInfo(videoID)
+        val video = snippet.toVideo(videoID)
 
-    val (snippet, audio) = yt.videoInfo(videoID)
-    val video = snippet.toVideo(videoID)
-
-    return rss20 {
         it.modules = mutableListOf(
             itunes {
                 it.image = video.bestThumbnail()
@@ -110,13 +110,11 @@ fun asFeed(yt: YouTube, videoID: VideoID, player: Player): SyndFeed {
         it.author = video.channelTitle
         it.entries = listOf(entry(video, audio, player))
     }
-}
 
-fun asFeed(yt: YouTube, playlistID: PlaylistID, player: Player): SyndFeed? {
+fun asFeed(yt: YouTube, playlistID: PlaylistID, player: Player): SyndFeed =
+    rss20 {
+        val playlist = yt.playlistInfo(playlistID)
 
-    val playlist = yt.playlistInfo(playlistID) ?: return null
-
-    return rss20 {
         it.modules = mutableListOf(
             itunes {
                 it.image = playlist.thumbnails.best()?.url?.let { URL(it) }
@@ -132,13 +130,11 @@ fun asFeed(yt: YouTube, playlistID: PlaylistID, player: Player): SyndFeed? {
         it.author = playlist.channelTitle
         it.entries = playlistEntries(yt, playlistID, player)
     }
-}
 
-fun asFeed(yt: YouTube, channelID: ChannelId, player: Player): SyndFeed? {
+fun asFeed(yt: YouTube, channelID: ChannelId, player: Player): SyndFeed? =
+    rss20 {
+        val (snippet, details) = yt.channel(channelID)
 
-    val (snippet, details) = yt.channel(channelID)
-
-    return rss20 {
         it.modules = mutableListOf(
             itunes {
                 it.image = snippet.thumbnails?.best()?.url?.let { URL(it) }
@@ -154,4 +150,3 @@ fun asFeed(yt: YouTube, channelID: ChannelId, player: Player): SyndFeed? {
         it.author = snippet.title
         it.entries = playlistEntries(yt, PlaylistID(details.relatedPlaylists.uploads), player)
     }
-}

@@ -4,10 +4,8 @@ import com.rometools.rome.io.SyndFeedOutput
 import io.ktor.application.call
 import io.ktor.html.respondHtml
 import io.ktor.http.HttpHeaders
-import io.ktor.http.HttpStatusCode
 import io.ktor.request.ApplicationRequest
 import io.ktor.response.respondRedirect
-import io.ktor.response.respondText
 import io.ktor.response.respondWrite
 import io.ktor.routing.get
 import io.ktor.routing.route
@@ -42,8 +40,6 @@ fun mkClient(): OkHttpClient =
         .build()
 
 fun main(args: Array<String>) {
-
-    println("env\n${System.getenv()}")
 
     val client = mkClient()
     val youtube = mkYoutube()
@@ -93,13 +89,9 @@ fun main(args: Array<String>) {
             get("/playlist") {
                 val playlistId = PlaylistID(call.parameters["list"]!!)
 
-                val feed = asFeed(youtube, playlistId, call.request.player())
-
-                feed?.let {
-                    call.respondWrite {
-                        output.output(feed, this)
-                    }
-                } ?: call.respondText(status = HttpStatusCode.NotFound, text = "$playlistId does not exist")
+                call.respondWrite {
+                    output.output(asFeed(youtube, playlistId, call.request.player()), this)
+                }
             }
 
             get("/audio") {
@@ -143,8 +135,7 @@ fun ApplicationRequest.isBrowser(): Boolean =
     headers[HttpHeaders.UserAgent]?.startsWith("Mozilla") == true
 
 fun ApplicationRequest.player(): Player =
-    if (isBrowser()) Player.BROWSER
-    else Player.OTHER
+    if (isBrowser()) Player.BROWSER else Player.OTHER
 
 private fun HTML.renderHome(url: String?, resolved: String?): Unit =
     body {

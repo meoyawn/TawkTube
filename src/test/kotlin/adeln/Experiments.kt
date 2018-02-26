@@ -1,7 +1,8 @@
 package adeln
 
+import io.kotlintest.matchers.haveSize
+import io.kotlintest.matchers.should
 import io.kotlintest.matchers.shouldEqual
-import kotlinx.coroutines.experimental.runBlocking
 import okhttp3.HttpUrl
 import org.junit.Test
 
@@ -37,13 +38,6 @@ class Experiments {
     }
 
     @Test
-    fun badPlaylist() {
-        runBlocking {
-            println(asFeed(mkYoutube(), PlaylistID("PLdJo8g6QW5jboqKz4d6H3UawnFzJRH4hO"), Player.BROWSER))
-        }
-    }
-
-    @Test
     fun badAudio() {
         println(
             audio(mkClient(), VideoID("iAst9D6js1g"), Player.BROWSER)
@@ -76,5 +70,10 @@ class Experiments {
     fun mobileYt() {
         resolve(HttpUrl.parse("https://m.youtube.com/playlist?list=PLE7DDD91010BC51F8")!!) shouldEqual
             HttpUrl.parse("http://localhost:8080/playlist?list=PLE7DDD91010BC51F8")
+    }
+
+    @Test
+    fun instantRegret() {
+        playlistEntries(mkYoutube(), PlaylistID("PLiQrdzH3aBWi6nh1kdbYfy2dd1CSOwBz5"), Player.BROWSER) should haveSize(74)
     }
 }
