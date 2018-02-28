@@ -1,4 +1,4 @@
-version '1.0-SNAPSHOT'
+version "1.0"
 
 buildscript {
 
@@ -33,22 +33,22 @@ configurations {
 
 dependencies {
     compile "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
-    compile 'org.jetbrains.kotlinx:kotlinx-coroutines-core:0.22.3'
+    compile "org.jetbrains.kotlinx:kotlinx-coroutines-core:0.22.3"
 
-    compile group: 'com.squareup.okhttp3', name: 'okhttp', version: '3.10.0'
+    compile "com.squareup.okhttp3:okhttp:3.10.0"
 
-    compile group: 'com.rometools', name: 'rome', version: rome_version
-    compile group: 'com.rometools', name: 'rome-modules', version: rome_version
+    compile "com.rometools:rome:$rome_version"
+    compile "com.rometools:rome-modules:$rome_version"
 
-    compile 'com.google.apis:google-api-services-youtube:v3-rev192-1.23.0'
+    compile "com.google.apis:google-api-services-youtube:v3-rev192-1.23.0"
 
     compile "io.ktor:ktor-server-netty:$ktor_version"
     compile "io.ktor:ktor-html-builder:$ktor_version"
     compile "io.ktor:ktor-client-core:$ktor_version"
 
-    compile 'com.yandex.android:disk-restapi-sdk:1.03'
+    compile "com.yandex.android:disk-restapi-sdk:1.03"
 
-    testCompile('io.kotlintest:kotlintest:2.0.7')
+    testCompile 'io.kotlintest:kotlintest:2.0.7'
 
     ktlint "com.github.shyiko:ktlint:0.16.1"
 }
