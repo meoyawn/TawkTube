@@ -5,6 +5,7 @@ import io.kotlintest.matchers.should
 import io.kotlintest.matchers.shouldEqual
 import okhttp3.HttpUrl
 import org.junit.Test
+import java.net.URLEncoder
 
 class Experiments {
 
@@ -46,8 +47,9 @@ class Experiments {
 
     @Test
     fun disk() {
-        resolve(HttpUrl.parse("https://yadi.sk/d/I5HDo-VY3R4Bvn")!!) shouldEqual
-            HttpUrl.parse("http://localhost:8080/yandexdisk/public?link=https://yadi.sk/d/I5HDo-VY3R4Bvn")
+        val diskLink = "https://yadi.sk/d/I5HDo-VY3R4Bvn"
+        resolve(HttpUrl.parse(diskLink)!!) shouldEqual
+            HttpUrl.parse("http://localhost:8080/yandexdisk/public?link=${URLEncoder.encode(diskLink, "utf-8")}")
     }
 
     @Test
