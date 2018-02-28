@@ -21,7 +21,7 @@ fun resolveShortYt(url: HttpUrl): HttpUrl? =
     url.pathSegments().lastOrNull()?.takeIf(String::isNotBlank)?.let { buildVideo(VideoID(it)) }
 
 fun buildYaDisk(url: HttpUrl): HttpUrl =
-    Config.ADDR.newBuilder()
+    Config.HOST.newBuilder()
         .addPathSegment("yandexdisk")
         .addPathSegment("public")
         .addQueryParameter("link", url.toString())
@@ -34,25 +34,25 @@ fun resolveYt(url: HttpUrl): HttpUrl? =
         ?: url.pathSegments()?.takeIf { "user" in it }?.last()?.takeIf(String::isNotBlank)?.let { buildUser(ChannelId.ByName(it)) }
 
 fun buildVideo(videoID: VideoID): HttpUrl =
-    Config.ADDR.newBuilder()
+    Config.HOST.newBuilder()
         .addPathSegments("video")
         .addQueryParameter("v", videoID.id)
         .build()
 
 fun buildPlaylist(playlistID: PlaylistID): HttpUrl =
-    Config.ADDR.newBuilder()
+    Config.HOST.newBuilder()
         .addPathSegment("playlist")
         .addQueryParameter("list", playlistID.id)
         .build()
 
 fun buildChannel(channelID: ChannelId.ById): HttpUrl =
-    Config.ADDR.newBuilder()
+    Config.HOST.newBuilder()
         .addPathSegment("channel")
         .addPathSegment(channelID.id)
         .build()
 
 fun buildUser(username: ChannelId.ByName): HttpUrl =
-    Config.ADDR.newBuilder()
+    Config.HOST.newBuilder()
         .addPathSegment("user")
         .addPathSegment(username.name)
         .build()

@@ -84,7 +84,7 @@ fun entry(video: Video, audio: VideoContentDetails, player: Player): SyndEntry =
     }
 
 fun audioUrl(videoID: VideoID): HttpUrl =
-    Config.ADDR.newBuilder()
+    Config.HOST.newBuilder()
         .addPathSegment("audio")
         .addQueryParameter("v", videoID.id)
         .build()

@@ -32,7 +32,7 @@ object Secrets {
 
 object Config {
     val PORT = System.getenv("PORT")?.toInt() ?: 8080
-    val ADDR = HttpUrl.parse(System.getenv("HEROKU_URL") ?: "http://localhost:$PORT")!!
+    val HOST = HttpUrl.parse(System.getenv("HEROKU_URL") ?: "http://localhost:$PORT")!!
 }
 
 fun mkClient(): OkHttpClient =

@@ -71,7 +71,7 @@ fun Resource.pathToTitle(): String =
 fun asEntry(res: Resource): SyndEntryImpl =
     entry {
 
-        val url = Config.ADDR.newBuilder()
+        val url = Config.HOST.newBuilder()
             .addPathSegments("yandexdisk/audio")
             .addQueryParameter("publicKey", res.publicKey)
             .addQueryParameter("path", res.path.path)
