@@ -26,7 +26,6 @@ import kotlinx.html.ul
 import okhttp3.HttpUrl
 import okhttp3.OkHttpClient
 
-
 object Secrets {
     const val YT_KEY = "AIzaSyBXaU6RB0KwBFqEz5sdcyjXiNySefvUHLc"
 }
@@ -128,7 +127,6 @@ fun main(args: Array<String>) {
                     call.respondRedirect(yandexDisk.getPublicResourceDownloadLink(publicKey, path).href)
                 }
             }
-
         }
     }.start(wait = true)
 }
@@ -139,6 +137,7 @@ fun ApplicationRequest.isBrowser(): Boolean =
 fun ApplicationRequest.player(): Player =
     if (isBrowser()) Player.BROWSER else Player.OTHER
 
+/* ktlint-disable chain-wrapping */
 private fun HTML.renderHome(url: String?, resolved: String?) {
 
     val title = "YouTube to audio podcast converter"
@@ -198,3 +197,4 @@ private fun HTML.renderHome(url: String?, resolved: String?) {
         }
     }
 }
+/* ktlint-enable chain-wrapping */

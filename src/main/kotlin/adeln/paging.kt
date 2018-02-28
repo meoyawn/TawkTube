@@ -1,11 +1,12 @@
 package adeln
 
-tailrec fun <T, P> paging(pageToken: P? = null,
-                          accum: MutableList<T> = mutableListOf(),
-                          nextPage: (T) -> P?,
-                          load: (page: P?) -> T,
-                          limit: Int): List<T> {
-
+tailrec fun <T, P> paging(
+    pageToken: P? = null,
+    accum: MutableList<T> = mutableListOf(),
+    nextPage: (T) -> P?,
+    load: (page: P?) -> T,
+    limit: Int
+): List<T> {
     val x = load(pageToken)
 
     accum += x

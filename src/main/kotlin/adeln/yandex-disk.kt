@@ -28,11 +28,13 @@ fun mkYandexDisk(): YandexDisk =
 
 enum class PreviewSize { XL }
 
-fun YandexDisk.listPublicResources(publicKey: String,
-                                   path: ResourcePath? = null,
-                                   previewSize: PreviewSize = PreviewSize.XL,
-                                   previewCrop: Boolean = true,
-                                   limit: Int = Int.MAX_VALUE): Resource =
+fun YandexDisk.listPublicResources(
+    publicKey: String,
+    path: ResourcePath? = null,
+    previewSize: PreviewSize = PreviewSize.XL,
+    previewCrop: Boolean = true,
+    limit: Int = Int.MAX_VALUE
+): Resource =
     listPublicResources(
         publicKey,
         path?.path,

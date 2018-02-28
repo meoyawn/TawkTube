@@ -38,7 +38,6 @@ inline fun rss20(f: (SyndFeedImpl) -> Unit): SyndFeedImpl =
 inline fun itunes(f: (FeedInformationImpl) -> Unit): FeedInformationImpl =
     FeedInformationImpl().also(f)
 
-
 fun Video.bestThumbnail(): URL? =
     thumbnails?.best()?.url.let { URL(it) }
 

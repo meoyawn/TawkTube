@@ -27,6 +27,10 @@ repositories {
     maven { url "https://dl.bintray.com/kotlin/kotlinx" }
 }
 
+configurations {
+    ktlint
+}
+
 dependencies {
     compile "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
     compile 'org.jetbrains.kotlinx:kotlinx-coroutines-core:0.22.2'
@@ -45,6 +49,26 @@ dependencies {
     compile 'com.yandex.android:disk-restapi-sdk:1.03'
 
     testCompile('io.kotlintest:kotlintest:2.0.7')
+
+    ktlint "com.github.shyiko:ktlint:0.16.1"
+}
+
+task ktlint(type: JavaExec, group: "verification") {
+    description = "Check Kotlin code style."
+    classpath = configurations.ktlint
+    main = "com.github.shyiko.ktlint.Main"
+    args "src/**/*.kt"
+    // to generate report in checkstyle format prepend following args:
+    // "--reporter=plain", "--reporter=checkstyle,output=${buildDir}/ktlint.xml"
+    // see https://github.com/shyiko/ktlint#usage for more
+}
+check.dependsOn ktlint
+
+task ktlintFormat(type: JavaExec, group: "formatting") {
+    description = "Fix Kotlin code style deviations."
+    classpath = configurations.ktlint
+    main = "com.github.shyiko.ktlint.Main"
+    args "-F", "src/**/*.kt"
 }
 
 compileKotlin {
