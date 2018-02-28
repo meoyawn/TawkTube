@@ -17,9 +17,11 @@ import kotlinx.html.a
 import kotlinx.html.body
 import kotlinx.html.form
 import kotlinx.html.h1
+import kotlinx.html.head
 import kotlinx.html.input
 import kotlinx.html.li
 import kotlinx.html.p
+import kotlinx.html.title
 import kotlinx.html.ul
 import okhttp3.HttpUrl
 import okhttp3.OkHttpClient
@@ -137,10 +139,17 @@ fun ApplicationRequest.isBrowser(): Boolean =
 fun ApplicationRequest.player(): Player =
     if (isBrowser()) Player.BROWSER else Player.OTHER
 
-private fun HTML.renderHome(url: String?, resolved: String?): Unit =
+private fun HTML.renderHome(url: String?, resolved: String?) {
+
+    val title = "YouTube to audio podcast converter"
+
+    head {
+        title(title)
+    }
+
     body {
 
-        h1 { +"YouTube to audio podcast converter" }
+        h1 { +title }
 
         p { +"Paste a link to a:" }
 
@@ -188,3 +197,4 @@ private fun HTML.renderHome(url: String?, resolved: String?): Unit =
             a(href = "https://github.com/adelnizamutdinov/youtube-rss") { +"Source code" }
         }
     }
+}
