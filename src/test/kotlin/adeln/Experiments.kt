@@ -10,42 +10,6 @@ import java.net.URLEncoder
 class Experiments {
 
     @Test
-    fun channel() {
-        println(
-            mkYoutube().channel(ChannelId.ById("UCC3L8QaxqEGUiBC252GHy3w"))
-        )
-
-        println(
-            mkYoutube().channel(ChannelId.ById("UCFQ6Gptuq-sLflbJ4YY3Umw"))
-        )
-    }
-
-    @Test
-    fun youtube() {
-        println(
-            audio(mkClient(), VideoID("v2soHxEN79c"), Player.BROWSER)
-        )
-    }
-
-    @Test
-    fun badVideos() {
-        listOf("6G59zsjM2UI", "1gYIGFr7zA8", "9qOQGBVedAQ", "1TN_Ig8sjxc")
-            .map(::VideoID)
-            .forEach {
-                println(
-                    audio(mkClient(), it, Player.BROWSER)
-                )
-            }
-    }
-
-    @Test
-    fun badAudio() {
-        println(
-            audio(mkClient(), VideoID("iAst9D6js1g"), Player.BROWSER)
-        )
-    }
-
-    @Test
     fun disk() {
         val diskLink = "https://yadi.sk/d/I5HDo-VY3R4Bvn"
         resolve(HttpUrl.parse(diskLink)!!) shouldEqual
@@ -61,11 +25,6 @@ class Experiments {
     @Test
     fun audioUrl() {
         audioUrl(VideoID("ha")) shouldEqual HttpUrl.parse("http://localhost:8080/audio?v=ha")
-    }
-
-    @Test
-    fun recursiveFolder() {
-        println(mkYandexDisk().recursiveResource("https://yadi.sk/d/EtEGI2fZ3SQUGS").files.map { it.pathToTitle() })
     }
 
     @Test
