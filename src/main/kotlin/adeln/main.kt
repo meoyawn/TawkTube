@@ -17,6 +17,7 @@ import io.ktor.server.netty.Netty
 import kotlinx.coroutines.experimental.asCoroutineDispatcher
 import kotlinx.coroutines.experimental.async
 import kotlinx.html.HTML
+import kotlinx.html.InputType
 import kotlinx.html.a
 import kotlinx.html.body
 import kotlinx.html.form
@@ -176,6 +177,7 @@ private fun HTML.renderHome(url: String?, resolved: String?) {
                 size = "100"
                 url?.let { value = it }
             }
+            input(type = InputType.submit)
         }
 
         when {
@@ -197,11 +199,7 @@ private fun HTML.renderHome(url: String?, resolved: String?) {
             }
 
             url != null && resolved == null ->
-                p {
-                    +"Failed to resolve that url. You can ping me on "
-
-                    a(href = "https://twitter.com/meoyawn") { +"twitter" }
-                }
+                p { +"Failed to resolve that url. You can ping me: comrade.adeln@ya.ru" }
         }
 
         p {
