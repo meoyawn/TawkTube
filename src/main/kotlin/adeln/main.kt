@@ -12,6 +12,8 @@ import io.ktor.routing.route
 import io.ktor.routing.routing
 import io.ktor.server.engine.embeddedServer
 import io.ktor.server.netty.Netty
+import kotlinx.coroutines.experimental.asCoroutineDispatcher
+import kotlinx.coroutines.experimental.async
 import kotlinx.html.HTML
 import kotlinx.html.a
 import kotlinx.html.body
@@ -25,6 +27,7 @@ import kotlinx.html.title
 import kotlinx.html.ul
 import okhttp3.HttpUrl
 import okhttp3.OkHttpClient
+import java.util.concurrent.Executors
 
 object Secrets {
     const val YT_KEY = "AIzaSyBXaU6RB0KwBFqEz5sdcyjXiNySefvUHLc"
@@ -39,6 +42,8 @@ fun mkClient(): OkHttpClient =
     OkHttpClient.Builder()
         .followRedirects(true)
         .build()
+
+val BLOCKING_IO = Executors.newCachedThreadPool().asCoroutineDispatcher()
 
 fun main(args: Array<String>) {
 
@@ -62,7 +67,7 @@ fun main(args: Array<String>) {
             get("/channel/{channelId}") {
                 val channelId = ChannelId.ById(call.parameters["channelId"]!!)
 
-                val feed = asFeed(youtube, channelId, call.request.player())
+                val feed = async(BLOCKING_IO) { asFeed(youtube, channelId, call.request.player()) }.await()
 
                 call.respondWrite {
                     output.output(feed, this)
@@ -72,7 +77,17 @@ fun main(args: Array<String>) {
             get("/user/{username}") {
                 val username = ChannelId.ByName(call.parameters["username"]!!)
 
-                val feed = asFeed(youtube, username, call.request.player())
+                val feed = async(BLOCKING_IO) { asFeed(youtube, username, call.request.player()) }.await()
+
+                call.respondWrite {
+                    output.output(feed, this)
+                }
+            }
+
+            get("/playlist") {
+                val playlistId = PlaylistID(call.parameters["list"]!!)
+
+                val feed = async(BLOCKING_IO) { asFeed(youtube, playlistId, call.request.player()) }.await()
 
                 call.respondWrite {
                     output.output(feed, this)
@@ -84,14 +99,6 @@ fun main(args: Array<String>) {
 
                 call.respondWrite {
                     output.output(asFeed(youtube, videoId, call.request.player()), this)
-                }
-            }
-
-            get("/playlist") {
-                val playlistId = PlaylistID(call.parameters["list"]!!)
-
-                call.respondWrite {
-                    output.output(asFeed(youtube, playlistId, call.request.player()), this)
                 }
             }
 
