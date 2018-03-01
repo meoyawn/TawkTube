@@ -69,7 +69,7 @@ fun playlistEntries(yt: YouTube, playlistID: PlaylistID, player: Player): List<S
     val full = paging<PlaylistVideos, String>(
         load = { yt.playlistVideos(playlistID, pageToken = it) },
         nextPage = { it.items.nextPageToken },
-        limit = 23
+        limit = 20
     )
 
     val items = full.flatMap { it.items.items }
