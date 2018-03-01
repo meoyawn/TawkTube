@@ -2,6 +2,8 @@ package adeln
 
 import com.rometools.rome.io.SyndFeedOutput
 import io.ktor.application.call
+import io.ktor.application.install
+import io.ktor.features.Compression
 import io.ktor.html.respondHtml
 import io.ktor.http.HttpHeaders
 import io.ktor.request.ApplicationRequest
@@ -53,6 +55,9 @@ fun main(args: Array<String>) {
     val yandexDisk = mkYandexDisk()
 
     embeddedServer(Netty, port = Config.PORT) {
+
+        install(Compression)
+
         routing {
 
             get("/") {
