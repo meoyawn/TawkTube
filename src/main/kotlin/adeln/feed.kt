@@ -39,7 +39,7 @@ inline fun itunes(f: (FeedInformationImpl) -> Unit): FeedInformationImpl =
     FeedInformationImpl().also(f)
 
 fun Video.bestThumbnail(): URL? =
-    thumbnails?.best()?.url.let { URL(it) }
+    thumbnails?.best()?.url?.let { URL(it) }
 
 fun entry(video: Video, audio: VideoContentDetails, player: Player): SyndEntry =
     entry {
