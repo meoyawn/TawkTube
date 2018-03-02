@@ -21,7 +21,7 @@ import kotlinx.html.InputType
 import kotlinx.html.a
 import kotlinx.html.body
 import kotlinx.html.form
-import kotlinx.html.h1
+import kotlinx.html.h2
 import kotlinx.html.head
 import kotlinx.html.input
 import kotlinx.html.li
@@ -161,7 +161,7 @@ private fun HTML.renderHome(url: String?, resolved: String?) {
 
     body {
 
-        h1 { +title }
+        h2 { +title }
 
         p { +"Paste a link to a:" }
 
@@ -174,7 +174,7 @@ private fun HTML.renderHome(url: String?, resolved: String?) {
 
         form(action = "/") {
             input(name = "url") {
-                size = "100"
+                size = "55"
                 url?.let { value = it }
             }
             input(type = InputType.submit)
