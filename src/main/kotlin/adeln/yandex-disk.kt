@@ -22,7 +22,7 @@ fun mkYandexDisk(): YandexDisk =
         .setClient(OkClient(OkHttpClientFactory.makeClient()))
         .setEndpoint("https://cloud-api.yandex.net")
         .setErrorHandler(ErrorHandlerImpl())
-        .setLogLevel(RestAdapter.LogLevel.BASIC)
+        .setLogLevel(RestAdapter.LogLevel.NONE)
         .build()
         .create(YandexDisk::class.java)
 

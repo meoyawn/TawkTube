@@ -3,7 +3,7 @@ version "1.0"
 buildscript {
 
     ext {
-        kotlin_version = '1.2.21'
+        kotlin_version = '1.2.30'
         rome_version = "1.9.0"
         ktor_version = "0.9.1"
     }
