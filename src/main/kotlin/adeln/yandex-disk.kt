@@ -77,7 +77,7 @@ fun asEntry(res: Resource): SyndEntryImpl =
             .addQueryParameter("path", res.path.path)
             .build()
 
-        it.modules = mutableListOf(DCModuleImpl() as Module)
+        it.modules = mutableListOf<Module>(DCModuleImpl())
 
         it.enclosures = listOf(
             SyndEnclosureImpl().also {
