@@ -1,5 +1,6 @@
 package adeln
 
+import com.rometools.rome.io.SyndFeedOutput
 import io.kotlintest.matchers.haveSize
 import io.kotlintest.matchers.should
 import io.kotlintest.matchers.shouldEqual
@@ -36,5 +37,10 @@ class Experiments {
     @Test
     fun instantRegret() {
         playlistEntries(mkYoutube(), PlaylistID("PLiQrdzH3aBWi6nh1kdbYfy2dd1CSOwBz5"), Player.BROWSER) should haveSize(72)
+    }
+
+    @Test
+    fun demons() {
+        println(SyndFeedOutput().outputString(mkYandexDisk().asFeed(HttpUrl.parse("https://yadi.sk/d/4OHFuxV93Xn7H6")!!)))
     }
 }
