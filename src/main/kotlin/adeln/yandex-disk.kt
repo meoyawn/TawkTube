@@ -66,7 +66,10 @@ fun YandexDisk.recursiveResource(publicKey: String, parent: Resource? = null): R
 }
 
 fun Resource.pathToTitle(): String =
-    path.path.replace(oldValue = "/", newValue = " ").trim()
+    path.path
+        .replace(oldValue = "/", newValue = " ")
+        .replaceAfterLast(delimiter = ".", replacement = "")
+        .trim()
 
 fun asEntry(res: Resource): SyndEntryImpl =
     entry {
