@@ -6,11 +6,9 @@ import io.ktor.application.install
 import io.ktor.features.Compression
 import io.ktor.html.respondHtml
 import io.ktor.http.HttpHeaders
-import io.ktor.http.HttpStatusCode
 import io.ktor.request.ApplicationRequest
 import io.ktor.response.respondRedirect
 import io.ktor.response.respondText
-import io.ktor.response.respondWrite
 import io.ktor.routing.get
 import io.ktor.routing.route
 import io.ktor.routing.routing
@@ -32,7 +30,6 @@ import kotlinx.html.title
 import kotlinx.html.ul
 import okhttp3.HttpUrl
 import okhttp3.OkHttpClient
-import java.io.PrintWriter
 import java.util.concurrent.Executors
 
 object Secrets {
@@ -122,14 +119,8 @@ fun main(args: Array<String>) {
 
                 get("/public") {
                     val url = HttpUrl.parse(call.parameters["link"]!!)!!
-                    try {
-                        val feed = yandexDisk.asFeed(url)
-                        call.respondText(output.outputString(feed))
-                    } catch (e: Exception) {
-                        call.respondWrite(status = HttpStatusCode.InternalServerError) {
-                            e.printStackTrace(PrintWriter(this))
-                        }
-                    }
+                    val feed = yandexDisk.asFeed(url)
+                    call.respondText(output.outputString(feed))
                 }
 
                 get("/audio") {

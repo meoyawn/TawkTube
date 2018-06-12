@@ -41,6 +41,6 @@ class Experiments {
 
     @Test
     fun demons() {
-        println(SyndFeedOutput().outputString(mkYandexDisk().asFeed(HttpUrl.parse("https://yadi.sk/d/4OHFuxV93Xn7H6")!!)))
+        SyndFeedOutput().outputString(mkYandexDisk().asFeed(HttpUrl.parse("https://yadi.sk/d/4OHFuxV93Xn7H6")!!))
     }
 }
