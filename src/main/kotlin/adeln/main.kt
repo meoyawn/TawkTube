@@ -9,7 +9,6 @@ import io.ktor.http.HttpHeaders
 import io.ktor.request.ApplicationRequest
 import io.ktor.response.respondRedirect
 import io.ktor.response.respondText
-import io.ktor.response.respondWrite
 import io.ktor.routing.get
 import io.ktor.routing.route
 import io.ktor.routing.routing
@@ -87,9 +86,7 @@ fun main(args: Array<String>) {
             get("/video") {
                 val videoId = VideoID(call.parameters["v"]!!)
 
-                call.respondWrite {
-                    output.output(asFeed(youtube, videoId, call.request.player()), this)
-                }
+                call.respondText(output.outputString(asFeed(youtube, videoId, call.request.player())))
             }
 
             get("/audio") {
@@ -113,9 +110,7 @@ fun main(args: Array<String>) {
                     val url = HttpUrl.parse(call.parameters["link"]!!)!!
                     val feed = yandexDisk.asFeed(url)
 
-                    call.respondWrite {
-                        output.output(feed, this)
-                    }
+                    call.respondText(output.outputString(feed))
                 }
 
                 get("/audio") {
