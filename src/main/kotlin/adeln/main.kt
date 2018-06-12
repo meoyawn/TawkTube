@@ -139,10 +139,9 @@ fun ApplicationRequest.isBrowser(): Boolean =
 fun ApplicationRequest.player(): Player =
     if (isBrowser()) Player.BROWSER else Player.OTHER
 
-/* ktlint-disable chain-wrapping */
 private fun HTML.renderHome(url: String?, resolved: String?) {
 
-    val title = "YouTube to audio podcast converter"
+    val title = "TawkTube"
 
     head {
         title(title)
@@ -192,8 +191,11 @@ private fun HTML.renderHome(url: String?, resolved: String?) {
         }
 
         p {
+            a(href = "https://www.patreon.com/TawkTube") { +"Support the project" }
+        }
+
+        p {
             a(href = "https://github.com/adelnizamutdinov/youtube-rss") { +"Source code" }
         }
     }
 }
-/* ktlint-enable chain-wrapping */
