@@ -35,6 +35,6 @@ class Experiments {
 
     @Test
     fun instantRegret() {
-        playlistEntries(mkYoutube(), PlaylistID("PLiQrdzH3aBWi6nh1kdbYfy2dd1CSOwBz5"), Player.BROWSER) should haveSize(74)
+        playlistEntries(mkYoutube(), PlaylistID("PLiQrdzH3aBWi6nh1kdbYfy2dd1CSOwBz5"), Player.BROWSER) should haveSize(72)
     }
 }
