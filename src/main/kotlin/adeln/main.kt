@@ -8,6 +8,7 @@ import io.ktor.html.respondHtml
 import io.ktor.http.HttpHeaders
 import io.ktor.request.ApplicationRequest
 import io.ktor.response.respondRedirect
+import io.ktor.response.respondText
 import io.ktor.response.respondWrite
 import io.ktor.routing.get
 import io.ktor.routing.route
@@ -16,18 +17,7 @@ import io.ktor.server.engine.embeddedServer
 import io.ktor.server.netty.Netty
 import kotlinx.coroutines.experimental.asCoroutineDispatcher
 import kotlinx.coroutines.experimental.async
-import kotlinx.html.HTML
-import kotlinx.html.InputType
-import kotlinx.html.a
-import kotlinx.html.body
-import kotlinx.html.form
-import kotlinx.html.h2
-import kotlinx.html.head
-import kotlinx.html.input
-import kotlinx.html.li
-import kotlinx.html.p
-import kotlinx.html.title
-import kotlinx.html.ul
+import kotlinx.html.*
 import okhttp3.HttpUrl
 import okhttp3.OkHttpClient
 import java.util.concurrent.Executors
@@ -75,9 +65,7 @@ fun main(args: Array<String>) {
 
                 val feed = async(BLOCKING_IO) { asFeed(youtube, channelId, call.request.player()) }.await()
 
-                call.respondWrite {
-                    output.output(feed, this)
-                }
+                call.respondText(output.outputString(feed))
             }
 
             get("/user/{username}") {
@@ -85,9 +73,7 @@ fun main(args: Array<String>) {
 
                 val feed = async(BLOCKING_IO) { asFeed(youtube, username, call.request.player()) }.await()
 
-                call.respondWrite {
-                    output.output(feed, this)
-                }
+                call.respondText(output.outputString(feed))
             }
 
             get("/playlist") {
@@ -95,9 +81,7 @@ fun main(args: Array<String>) {
 
                 val feed = async(BLOCKING_IO) { asFeed(youtube, playlistId, call.request.player()) }.await()
 
-                call.respondWrite {
-                    output.output(feed, this)
-                }
+                call.respondText(output.outputString(feed))
             }
 
             get("/video") {
