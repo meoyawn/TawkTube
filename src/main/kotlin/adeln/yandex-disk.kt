@@ -72,7 +72,7 @@ fun Resource.pathToTitle(): String =
     path.path
         .replace(oldValue = "/", newValue = " ")
         .replaceAfterLast(delimiter = ".", replacement = "")
-        .let { if (it.endsWith(suffix = ".")) it.drop(n = 1) else it }
+        .let { if (it.endsWith(suffix = ".")) it.dropLast(n = 1) else it }
         .trim()
 
 fun asEntry(res: Resource): SyndEntryImpl =
