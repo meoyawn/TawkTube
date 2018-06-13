@@ -59,7 +59,10 @@ fun YandexDisk.recursiveResource(publicKey: String, parent: Resource? = null): R
     val dir = listPublicResources(publicKey = publicKey, path = parent?.path)
 
     val items = dir.resourceList.items
-    val deepFiles = items.filter(Resource::isDir).flatMap { recursiveResource(it.publicKey, it).files }
+    val deepFiles = items.filter(Resource::isDir).flatMap {
+        Thread.sleep(1000)
+        recursiveResource(it.publicKey, it).files
+    }
     val flatFiles = items.filter(!Resource::isDir)
 
     return RecursiveFolder(dir = dir, files = deepFiles + flatFiles)
