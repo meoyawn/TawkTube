@@ -22,6 +22,7 @@ import kotlinx.html.a
 import kotlinx.html.body
 import kotlinx.html.form
 import kotlinx.html.h2
+import kotlinx.html.h3
 import kotlinx.html.head
 import kotlinx.html.input
 import kotlinx.html.li
@@ -190,20 +191,22 @@ private fun HTML.renderHome(url: String?, resolved: String?) {
                 p { +"Failed to resolve that url. You can ping me: comrade.adeln@ya.ru" }
         }
 
-        h2 {
+        p {
+            a(href = "https://github.com/adelnizamutdinov/youtube-rss") { +"Source code" }
+        }
+
+        h3 {
             +"Support"
         }
 
-        p {
-            a(href = "https://www.paypal.me/adelniz") { +"PayPal" }
-        }
+        ul {
+            li {
+                a(href = "https://www.paypal.me/adelniz") { +"PayPal" }
 
-        p {
-            a(href = "https://www.patreon.com/TawkTube") { +"Patreon" }
-        }
-
-        p {
-            a(href = "https://github.com/adelnizamutdinov/youtube-rss") { +"Source code" }
+            }
+            li {
+                a(href = "https://www.patreon.com/TawkTube") { +"Patreon" }
+            }
         }
     }
 }
