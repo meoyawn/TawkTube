@@ -202,7 +202,6 @@ private fun HTML.renderHome(url: String?, resolved: String?) {
         ul {
             li {
                 a(href = "https://www.paypal.me/adelniz") { +"PayPal" }
-
             }
             li {
                 a(href = "https://www.patreon.com/TawkTube") { +"Patreon" }
