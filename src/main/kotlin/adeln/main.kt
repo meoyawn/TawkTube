@@ -190,8 +190,16 @@ private fun HTML.renderHome(url: String?, resolved: String?) {
                 p { +"Failed to resolve that url. You can ping me: comrade.adeln@ya.ru" }
         }
 
+        h2 {
+            +"Support"
+        }
+
         p {
-            a(href = "https://www.patreon.com/TawkTube") { +"Support the project" }
+            a(href = "https://www.paypal.me/adelniz") { +"PayPal" }
+        }
+
+        p {
+            a(href = "https://www.patreon.com/TawkTube") { +"Patreon" }
         }
 
         p {
