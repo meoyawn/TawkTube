@@ -15,18 +15,22 @@ import io.ktor.routing.routing
 import io.ktor.server.engine.embeddedServer
 import io.ktor.server.netty.Netty
 import kotlinx.coroutines.experimental.asCoroutineDispatcher
-import kotlinx.coroutines.experimental.async
+import kotlinx.coroutines.experimental.withContext
 import kotlinx.html.HTML
 import kotlinx.html.InputType
 import kotlinx.html.a
 import kotlinx.html.body
+import kotlinx.html.br
+import kotlinx.html.div
 import kotlinx.html.form
 import kotlinx.html.h2
 import kotlinx.html.h3
 import kotlinx.html.head
 import kotlinx.html.input
 import kotlinx.html.li
+import kotlinx.html.link
 import kotlinx.html.p
+import kotlinx.html.role
 import kotlinx.html.title
 import kotlinx.html.ul
 import okhttp3.HttpUrl
@@ -64,7 +68,7 @@ fun main(args: Array<String>) {
 
             get("/") {
                 val url = call.parameters["url"]
-                val resolved = url?.let { HttpUrl.parse(it) }?.let { resolve(it) }?.toString()
+                val resolved = url?.let(HttpUrl::parse)?.let(::resolve)
 
                 call.respondHtml {
                     renderHome(url, resolved)
@@ -74,7 +78,7 @@ fun main(args: Array<String>) {
             get("/channel/{channelId}") {
                 val channelId = ChannelId.ById(call.parameters["channelId"]!!)
 
-                val feed = async(BLOCKING_IO) { asFeed(youtube, channelId, call.request.player()) }.await()
+                val feed = withContext(BLOCKING_IO) { asFeed(youtube, channelId, call.request.player()) }
 
                 call.respondText(output.outputString(feed))
             }
@@ -82,7 +86,7 @@ fun main(args: Array<String>) {
             get("/user/{username}") {
                 val username = ChannelId.ByName(call.parameters["username"]!!)
 
-                val feed = async(BLOCKING_IO) { asFeed(youtube, username, call.request.player()) }.await()
+                val feed = withContext(BLOCKING_IO) { asFeed(youtube, username, call.request.player()) }
 
                 call.respondText(output.outputString(feed))
             }
@@ -90,7 +94,7 @@ fun main(args: Array<String>) {
             get("/playlist") {
                 val playlistId = PlaylistID(call.parameters["list"]!!)
 
-                val feed = async(BLOCKING_IO) { asFeed(youtube, playlistId, call.request.player()) }.await()
+                val feed = withContext(BLOCKING_IO) { asFeed(youtube, playlistId, call.request.player()) }
 
                 call.respondText(output.outputString(feed))
             }
@@ -140,71 +144,86 @@ fun ApplicationRequest.isBrowser(): Boolean =
 fun ApplicationRequest.player(): Player =
     if (isBrowser()) Player.BROWSER else Player.OTHER
 
-private fun HTML.renderHome(url: String?, resolved: String?) {
+private fun HTML.renderHome(url: String?, resolved: HttpUrl?) {
 
     val title = "TawkTube"
 
     head {
+        link {
+            rel = "stylesheet"
+            href = "https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css"
+        }
+
         title(title)
     }
 
     body {
+        div(classes = "container") {
+            br
 
-        h2 { +title }
+            h2 { +title }
 
-        p { +"Paste a link to a:" }
+            p { +"Paste a link to a:" }
 
-        ul {
-            li { +"youtube video" }
-            li { +"youtube playlist" }
-            li { +"youtube channel" }
-            li { +"yandex disk public folder with your audiobook" }
-        }
-
-        form(action = "/") {
-            input(name = "url") {
-                size = "55"
-                url?.let { value = it }
+            ul {
+                li { +"youtube video" }
+                li { +"youtube playlist" }
+                li { +"youtube channel" }
+                li { +"yandex disk public folder with your audiobook" }
             }
-            input(type = InputType.submit)
-        }
 
-        when {
-            url != null && resolved != null -> {
-
-                p { +"Here's your podcast:" }
-
-                a(href = resolved) { +resolved }
-
-                p {
-                    +"You can listen to it using "
-
-                    a(href = "https://pocketcasts.com/submit") { +"Pocket Casts" }
-
-                    +" or "
-
-                    a(href = "https://player.fm/importer/feed") { +"Player FM" }
+            form(classes = "input-group", action = "/") {
+                input(classes = "form-control") {
+                    name = "url"
+                    size = "55"
+                    url?.let { value = it }
+                }
+                div(classes = "input-group-append") {
+                    input(classes = " btn btn-outline-secondary", type = InputType.submit)
                 }
             }
 
-            url != null && resolved == null ->
-                p { +"Failed to resolve that url. You can ping me: comrade.adeln@ya.ru" }
-        }
+            when {
+                url != null && resolved != null -> {
 
-        p {
-            a(href = "https://github.com/adelnizamutdinov/youtube-rss") { +"Source code" }
-        }
+                    p { +"Here's your podcast:" }
 
-        h3 {
-            +"Support"
-        }
+                    val theLink = resolved.toString()
+                    a(href = theLink) { +theLink }
 
-        ul {
-            li {
-                a(href = "https://www.paypal.me/adelniz") { +"PayPal" }
+                    p {
+                        +"You can listen to it using "
+
+                        a(href = "https://pocketcasts.com/submit") { +"Pocket Casts" }
+
+                        +" or "
+
+                        a(href = "https://player.fm/importer/feed") { +"Player FM" }
+                    }
+                }
+
+                url != null && resolved == null ->
+                    p { +"Failed to resolve that url. You can ping me: comrade.adeln@ya.ru" }
             }
-            li {
-                a(href = "https://www.patreon.com/TawkTube") { +"Patreon" }
+
+            p {
+                a(href = "https://github.com/adelnizamutdinov/youtube-rss") { +"Source code" }
+            }
+
+            h3 {
+                +"Support"
+            }
+
+            a(classes = "btn btn-primary", href = "https://www.paypal.me/adelniz") {
+                role = "button"
+
+                +"PayPal"
+            }
+
+            a(classes = "btn btn-warning", href = "https://www.patreon.com/TawkTube") {
+                role = "button"
+
+                +"Patreon"
             }
         }
     }
