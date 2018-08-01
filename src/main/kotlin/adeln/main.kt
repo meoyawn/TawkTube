@@ -175,7 +175,6 @@ private fun HTML.renderHome(url: String?, resolved: HttpUrl?) {
             form(classes = "input-group", action = "/") {
                 input(classes = "form-control") {
                     name = "url"
-                    size = "55"
                     url?.let { value = it }
                 }
                 div(classes = "input-group-append") {
