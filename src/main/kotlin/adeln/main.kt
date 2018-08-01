@@ -27,8 +27,10 @@ import kotlinx.html.h2
 import kotlinx.html.h3
 import kotlinx.html.head
 import kotlinx.html.input
+import kotlinx.html.lang
 import kotlinx.html.li
 import kotlinx.html.link
+import kotlinx.html.meta
 import kotlinx.html.p
 import kotlinx.html.role
 import kotlinx.html.title
@@ -146,9 +148,20 @@ fun ApplicationRequest.player(): Player =
 
 private fun HTML.renderHome(url: String?, resolved: HttpUrl?) {
 
+    lang = "en"
+
     val title = "TawkTube"
 
     head {
+        meta {
+            charset = "utf-8"
+        }
+
+        meta {
+            name = "viewport"
+            content = "width=device-width, initial-scale=1, shrink-to-fit=no"
+        }
+
         link {
             rel = "stylesheet"
             href = "https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css"
@@ -172,13 +185,15 @@ private fun HTML.renderHome(url: String?, resolved: HttpUrl?) {
                 li { +"yandex disk public folder with your audiobook" }
             }
 
-            form(classes = "input-group", action = "/") {
-                input(classes = "form-control") {
-                    name = "url"
-                    url?.let { value = it }
-                }
-                div(classes = "input-group-append") {
-                    input(classes = " btn btn-outline-secondary", type = InputType.submit)
+            form(action = "/") {
+                div(classes = "input-group") {
+                    input(classes = "form-control") {
+                        name = "url"
+                        url?.let { value = it }
+                    }
+                    div(classes = "input-group-append") {
+                        input(classes = " btn btn-outline-secondary", type = InputType.submit)
+                    }
                 }
             }
 
