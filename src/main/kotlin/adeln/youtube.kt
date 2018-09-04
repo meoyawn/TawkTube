@@ -36,6 +36,11 @@ data class YtVideo(
     val contentDetails: VideoContentDetails
 )
 
+data class Details(
+    val id: VideoID,
+    val details: VideoContentDetails
+)
+
 fun link(id: VideoID): HttpUrl =
     HttpUrl.parse("https://youtube.com/watch?v=${id.id}")!!
 
@@ -75,7 +80,10 @@ fun playlistEntries(yt: YouTube, playlistID: PlaylistID, player: Player): List<S
     val items = full.flatMap { it.items.items }
     val details = full.flatMap { it.videos }
 
-    return items.zip(details) { snippet, detail -> entry(snippet.snippet.toVideo(), detail, player) }
+    return details.map { detail ->
+        val snippet = items.first { it.snippet.resourceId.videoId == detail.id.id }
+        entry(video = snippet.snippet.toVideo(), audio = detail.details, player = player)
+    }
 }
 
 private fun YouTube.playlistItems(playlistID: PlaylistID, pageToken: String?): PlaylistItemListResponse =
@@ -88,7 +96,7 @@ private fun YouTube.playlistItems(playlistID: PlaylistID, pageToken: String?): P
 
 data class PlaylistVideos(
     val items: PlaylistItemListResponse,
-    val videos: List<VideoContentDetails>
+    val videos: List<Details>
 )
 
 fun YouTube.playlistVideos(playlistID: PlaylistID, pageToken: String?): PlaylistVideos {
@@ -115,14 +123,14 @@ fun YouTube.videoInfo(id: VideoID): YtVideo =
         .first()
         .let { YtVideo(snippet = it.snippet, contentDetails = it.contentDetails) }
 
-fun YouTube.videos(ids: List<VideoID>): List<VideoContentDetails> =
+fun YouTube.videos(ids: List<VideoID>): List<Details> =
     videos()
         .list("contentDetails")
         .setId(ids.joinToString(separator = ",") { it.id })
         .setMaxResults(50)
         .execute()
         .items
-        .map { it.contentDetails }
+        .map { Details(VideoID(it.id), it.contentDetails) }
 
 fun YouTube.channel(channel: ChannelId): YtChannel =
     channels()
