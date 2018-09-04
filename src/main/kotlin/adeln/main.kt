@@ -162,6 +162,11 @@ private fun HTML.renderHome(url: String?, resolved: HttpUrl?) {
             content = "width=device-width, initial-scale=1, shrink-to-fit=no"
         }
 
+        meta {
+            name = "description"
+            content = "Listen to YouTube and audiobooks as a podcasts"
+        }
+
         link {
             rel = "stylesheet"
             href = "https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css"
