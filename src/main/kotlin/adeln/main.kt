@@ -111,6 +111,8 @@ fun main(args: Array<String>) {
 
                 val videoId = VideoID(call.parameters["v"]!!)
 
+                println("getting audio for ${call.request.headers[HttpHeaders.UserAgent]}")
+
                 val player =
                     if (call.request.isBrowser()) Player.BROWSER
                     else Player.OTHER
