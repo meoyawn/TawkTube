@@ -37,7 +37,7 @@ enum class Player {
 fun Player.audioType(): MimeType =
     when (this) {
         Player.BROWSER -> "audio/webm"
-        Player.OTHER -> "audio/mp4"
+        Player.OTHER -> "audio/x-m4a"
     }
 
 fun playerType(type: MimeType, player: Player): Boolean =
