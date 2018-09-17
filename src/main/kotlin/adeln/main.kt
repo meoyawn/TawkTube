@@ -3,6 +3,7 @@ package adeln
 import com.rometools.rome.io.SyndFeedOutput
 import io.ktor.application.call
 import io.ktor.application.install
+import io.ktor.features.AutoHeadResponse
 import io.ktor.features.Compression
 import io.ktor.html.respondHtml
 import io.ktor.http.HttpHeaders
@@ -65,6 +66,7 @@ fun main(args: Array<String>) {
     embeddedServer(Netty, port = Config.PORT) {
 
         install(Compression)
+        install(AutoHeadResponse)
 
         routing {
 
