@@ -6,6 +6,7 @@ import io.ktor.application.install
 import io.ktor.features.AutoHeadResponse
 import io.ktor.features.Compression
 import io.ktor.html.respondHtml
+import io.ktor.http.ContentType
 import io.ktor.http.HttpHeaders
 import io.ktor.request.ApplicationRequest
 import io.ktor.response.respondRedirect
@@ -84,7 +85,7 @@ fun main(args: Array<String>) {
 
                 val feed = withContext(BLOCKING_IO) { asFeed(youtube, channelId, call.request.player()) }
 
-                call.respondText(output.outputString(feed))
+                call.respondText(text = output.outputString(feed), contentType = ContentType.Application.Rss)
             }
 
             get("/user/{username}") {
@@ -92,7 +93,7 @@ fun main(args: Array<String>) {
 
                 val feed = withContext(BLOCKING_IO) { asFeed(youtube, username, call.request.player()) }
 
-                call.respondText(output.outputString(feed))
+                call.respondText(text = output.outputString(feed), contentType = ContentType.Application.Rss)
             }
 
             get("/playlist") {
@@ -100,13 +101,14 @@ fun main(args: Array<String>) {
 
                 val feed = withContext(BLOCKING_IO) { asFeed(youtube, playlistId, call.request.player()) }
 
-                call.respondText(output.outputString(feed))
+                call.respondText(text = output.outputString(feed), contentType = ContentType.Application.Rss)
             }
 
             get("/video") {
                 val videoId = VideoID(call.parameters["v"]!!)
 
-                call.respondText(output.outputString(asFeed(youtube, videoId, call.request.player())))
+                val feed = asFeed(youtube, videoId, call.request.player())
+                call.respondText(text = output.outputString(feed), contentType = ContentType.Application.Rss)
             }
 
             get("/audio") {
@@ -131,7 +133,7 @@ fun main(args: Array<String>) {
                 get("/public") {
                     val url = HttpUrl.parse(call.parameters["link"]!!)!!
                     val feed = yandexDisk.asFeed(url)
-                    call.respondText(output.outputString(feed))
+                    call.respondText(text = output.outputString(feed), contentType = ContentType.Application.Rss)
                 }
 
                 get("/audio") {
