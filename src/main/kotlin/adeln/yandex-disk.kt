@@ -3,6 +3,7 @@ package adeln
 import com.rometools.rome.feed.module.DCModuleImpl
 import com.rometools.rome.feed.module.Module
 import com.rometools.rome.feed.synd.SyndEnclosureImpl
+import com.rometools.rome.feed.synd.SyndEntry
 import com.rometools.rome.feed.synd.SyndEntryImpl
 import com.rometools.rome.feed.synd.SyndFeedImpl
 import com.yandex.disk.rest.OkHttpClientFactory
@@ -98,6 +99,9 @@ fun asEntry(res: Resource): SyndEntryImpl =
         it.publishedDate = res.created
     }
 
+fun List<SyndEntry>.sortDates(): List<SyndEntry> =
+    zip(map { it.publishedDate }.sorted()) { entry, date -> entry.also { it.publishedDate = date } }
+
 fun YandexDisk.asFeed(url: HttpUrl): SyndFeedImpl =
     rss20 {
         val (dir, files) = recursiveResource(publicKey = url.toString())
@@ -113,5 +117,5 @@ fun YandexDisk.asFeed(url: HttpUrl): SyndFeedImpl =
         it.description = dir.publicUrl
         it.link = dir.publicUrl
         it.publishedDate = dir.created
-        it.entries = files.filter { it.mediaType == "audio" }.map(::asEntry)
+        it.entries = files.filter { it.mediaType == "audio" }.map(::asEntry).sortDates()
     }
