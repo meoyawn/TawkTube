@@ -5,7 +5,7 @@ buildscript {
     ext {
         kotlin_version = '1.3.0'
         rome_version = "1.11.1"
-        ktor_version = "1.0.0-beta-3"
+        ktor_version = "1.0.0-beta-4"
     }
 
     repositories {
@@ -46,7 +46,7 @@ dependencies {
 
     compile "io.ktor:ktor-server-netty:$ktor_version"
     compile "io.ktor:ktor-html-builder:$ktor_version"
-    compile "io.ktor:ktor-client-core:$ktor_version"
+//    compile "io.ktor:ktor-client-core:$ktor_version"
 
     compile "com.yandex.android:disk-restapi-sdk:1.03"
 
