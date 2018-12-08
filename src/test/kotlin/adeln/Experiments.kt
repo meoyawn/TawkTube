@@ -4,6 +4,7 @@ import com.rometools.rome.io.SyndFeedOutput
 import io.kotlintest.matchers.haveSize
 import io.kotlintest.matchers.should
 import io.kotlintest.matchers.shouldEqual
+import kotlinx.coroutines.runBlocking
 import okhttp3.HttpUrl
 import org.junit.Test
 import java.net.URLEncoder
@@ -42,6 +43,8 @@ class Experiments {
 
     @Test
     fun demons() {
-        SyndFeedOutput().outputString(mkYandexDisk().asFeed(HttpUrl.parse("https://yadi.sk/d/4OHFuxV93Xn7H6")!!))
+        runBlocking {
+            SyndFeedOutput().outputString(mkYandexDisk().asFeed(HttpUrl.parse("https://yadi.sk/d/4OHFuxV93Xn7H6")!!))
+        }
     }
 }

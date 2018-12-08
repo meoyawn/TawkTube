@@ -1,20 +1,18 @@
 package adeln
 
-import com.rometools.rome.feed.module.DCModuleImpl
-import com.rometools.rome.feed.module.Module
-import com.rometools.rome.feed.synd.SyndEnclosureImpl
 import com.rometools.rome.feed.synd.SyndEntry
-import com.rometools.rome.feed.synd.SyndEntryImpl
-import com.rometools.rome.feed.synd.SyndFeedImpl
+import com.rometools.rome.feed.synd.SyndFeed
 import com.yandex.disk.rest.OkHttpClientFactory
 import com.yandex.disk.rest.json.Resource
 import com.yandex.disk.rest.retrofit.CloudApi
 import com.yandex.disk.rest.retrofit.ErrorHandlerImpl
 import com.yandex.disk.rest.util.ResourcePath
+import kotlinx.coroutines.time.delay
 import okhttp3.HttpUrl
 import retrofit.RestAdapter
 import retrofit.client.OkClient
 import java.net.URL
+import java.time.Duration
 
 typealias YandexDisk = CloudApi
 
@@ -55,13 +53,13 @@ data class RecursiveFolder(
     val files: List<Resource>
 )
 
-fun YandexDisk.recursiveResource(publicKey: String, parent: Resource? = null): RecursiveFolder {
+suspend fun YandexDisk.recursiveResource(publicKey: String, parent: Resource? = null): RecursiveFolder {
 
     val dir = listPublicResources(publicKey = publicKey, path = parent?.path)
 
     val items = dir.resourceList.items
     val deepFiles = items.filter(Resource::isDir).flatMap {
-        Thread.sleep(300)
+        delay(Duration.ofMillis(300))
         recursiveResource(it.publicKey, it).files
     }
     val flatFiles = items.filter(!Resource::isDir)
@@ -76,7 +74,7 @@ fun Resource.pathToTitle(): String =
         .let { if (it.endsWith(suffix = ".")) it.dropLast(n = 1) else it }
         .trim()
 
-fun asEntry(res: Resource): SyndEntryImpl =
+fun asEntry(res: Resource): SyndEntry =
     entry {
 
         val url = Config.HOST.newBuilder()
@@ -85,10 +83,10 @@ fun asEntry(res: Resource): SyndEntryImpl =
             .addQueryParameter("path", res.path.path)
             .build()
 
-        it.modules = mutableListOf<Module>(DCModuleImpl())
+        it.modules = mutableListOf(dc { })
 
         it.enclosures = listOf(
-            SyndEnclosureImpl().also {
+            enclosure {
                 it.type = res.mimeType
                 it.url = url.toString()
             }
@@ -102,7 +100,7 @@ fun asEntry(res: Resource): SyndEntryImpl =
 fun List<SyndEntry>.sortDates(): List<SyndEntry> =
     zip(map { it.publishedDate }.sorted()) { entry, date -> entry.also { it.publishedDate = date } }
 
-fun YandexDisk.asFeed(url: HttpUrl): SyndFeedImpl =
+suspend fun YandexDisk.asFeed(url: HttpUrl): SyndFeed =
     rss20 {
         val (dir, files) = recursiveResource(publicKey = url.toString())
 
@@ -110,7 +108,7 @@ fun YandexDisk.asFeed(url: HttpUrl): SyndFeedImpl =
             itunes {
                 it.image = files.find { it.mediaType == "image" }?.preview?.let { URL(it) }
             },
-            DCModuleImpl()
+            dc { }
         )
 
         it.title = dir.name

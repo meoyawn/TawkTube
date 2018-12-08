@@ -4,6 +4,7 @@ import com.google.api.client.util.DateTime
 import com.google.api.services.youtube.model.PlaylistItemSnippet
 import com.google.api.services.youtube.model.ThumbnailDetails
 import com.google.api.services.youtube.model.VideoSnippet
+import java.net.URL
 
 data class Video(
     val id: VideoID,
@@ -36,3 +37,6 @@ fun PlaylistItemSnippet.toVideo(): Video =
         description = description,
         publishedAt = publishedAt
     )
+
+fun Video.bestThumbnail(): URL? =
+    thumbnails?.best()?.url?.let { URL(it) }

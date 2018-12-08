@@ -2,44 +2,11 @@ package adeln
 
 import com.google.api.services.youtube.YouTube
 import com.google.api.services.youtube.model.VideoContentDetails
-import com.rometools.modules.itunes.EntryInformationImpl
-import com.rometools.modules.itunes.FeedInformationImpl
 import com.rometools.modules.itunes.types.Duration
-import com.rometools.modules.mediarss.MediaEntryModuleImpl
-import com.rometools.modules.mediarss.types.MediaContent
-import com.rometools.modules.mediarss.types.UrlReference
-import com.rometools.rome.feed.module.DCModuleImpl
-import com.rometools.rome.feed.rss.Channel
-import com.rometools.rome.feed.synd.SyndContentImpl
-import com.rometools.rome.feed.synd.SyndEnclosureImpl
 import com.rometools.rome.feed.synd.SyndEntry
-import com.rometools.rome.feed.synd.SyndEntryImpl
 import com.rometools.rome.feed.synd.SyndFeed
-import com.rometools.rome.feed.synd.SyndFeedImpl
-import com.rometools.rome.io.impl.RSS20Generator
 import okhttp3.HttpUrl
 import java.net.URL
-
-inline fun itunesEntry(f: (EntryInformationImpl) -> Unit): EntryInformationImpl =
-    EntryInformationImpl().also(f)
-
-inline fun mediaEntry(f: (MediaEntryModuleImpl) -> Unit): MediaEntryModuleImpl =
-    MediaEntryModuleImpl().also(f)
-
-inline fun entry(f: (SyndEntryImpl) -> Unit): SyndEntryImpl =
-    SyndEntryImpl().also(f)
-
-inline fun mediaContent(url: HttpUrl, f: (MediaContent) -> Unit): MediaContent =
-    MediaContent(UrlReference(url.uri())).also(f)
-
-inline fun rss20(f: (SyndFeedImpl) -> Unit): SyndFeedImpl =
-    SyndFeedImpl(Channel(RSS20Generator().type)).also(f)
-
-inline fun itunes(f: (FeedInformationImpl) -> Unit): FeedInformationImpl =
-    FeedInformationImpl().also(f)
-
-fun Video.bestThumbnail(): URL? =
-    thumbnails?.best()?.url?.let { URL(it) }
 
 fun entry(video: Video, audio: VideoContentDetails, player: Player): SyndEntry =
     entry {
@@ -49,13 +16,11 @@ fun entry(video: Video, audio: VideoContentDetails, player: Player): SyndEntry =
         val duration = java.time.Duration.parse(audio.duration)
 
         it.modules = mutableListOf(
-            itunesEntry { itunes ->
-                itunes.image = video.bestThumbnail()
-                itunes.duration = Duration(duration.toMillis())
-                video.position?.let {
-                    itunes.order = it.toInt()
-                }
-                itunes.author = video.channelTitle
+            itunesEntry {
+                it.image = video.bestThumbnail()
+                it.duration = Duration(duration.toMillis())
+                it.order = video.position?.toInt()
+                it.author = video.channelTitle
             },
             mediaEntry {
                 it.mediaContents = arrayOf(
@@ -64,11 +29,11 @@ fun entry(video: Video, audio: VideoContentDetails, player: Player): SyndEntry =
                     }
                 )
             },
-            DCModuleImpl()
+            dc { }
         )
 
         it.enclosures = listOf(
-            SyndEnclosureImpl().also {
+            enclosure {
                 it.url = url.toString()
                 it.type = player.audioType()
             }
@@ -77,7 +42,7 @@ fun entry(video: Video, audio: VideoContentDetails, player: Player): SyndEntry =
         it.title = video.title
         it.link = link(videoID).toString()
         it.author = video.channelTitle
-        it.description = SyndContentImpl().also {
+        it.description = content {
             it.value = video.description
         }
         it.publishedDate = video.publishedAt.toDate()
@@ -99,7 +64,7 @@ fun asFeed(yt: YouTube, videoID: VideoID, player: Player): SyndFeed =
                 it.image = video.bestThumbnail()
                 it.author = video.channelTitle
             },
-            DCModuleImpl()
+            dc { }
         )
 
         it.title = video.title
@@ -116,10 +81,10 @@ fun asFeed(yt: YouTube, playlistID: PlaylistID, player: Player): SyndFeed =
 
         it.modules = mutableListOf(
             itunes {
-                it.image = playlist.thumbnails.best()?.url?.let { URL(it) }
+                it.image = playlist.thumbnails.best()?.url?.let(::URL)
                 it.author = playlist.channelTitle
             },
-            DCModuleImpl()
+            dc { }
         )
 
         it.title = playlist.title
@@ -136,10 +101,10 @@ fun asFeed(yt: YouTube, channelID: ChannelId, player: Player): SyndFeed? =
 
         it.modules = mutableListOf(
             itunes {
-                it.image = snippet.thumbnails?.best()?.url?.let { URL(it) }
+                it.image = snippet.thumbnails?.best()?.url?.let(::URL)
                 it.author = snippet.title
             },
-            DCModuleImpl()
+            dc { }
         )
 
         it.title = snippet.title

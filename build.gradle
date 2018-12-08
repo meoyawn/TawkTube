@@ -3,9 +3,9 @@ version "1.0"
 buildscript {
 
     ext {
-        kotlin_version = '1.3.0'
+        kotlin_version = '1.3.11'
         rome_version = "1.11.1"
-        ktor_version = "1.0.0-beta-4"
+        ktor_version = "1.0.1"
     }
 
     repositories {
@@ -23,7 +23,6 @@ apply plugin: "application"
 
 repositories {
     jcenter()
-    maven { url "http://dl.bintray.com/kotlin/ktor" }
 }
 
 configurations {
@@ -34,9 +33,9 @@ dependencies {
     compile "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
     compile "org.jetbrains.kotlin:kotlin-reflect:$kotlin_version"
 
-    compile "org.jetbrains.kotlinx:kotlinx-coroutines-core:1.0.1"
+    compile "org.jetbrains.kotlinx:kotlinx-coroutines-core:+"
 
-    compile "com.squareup.okhttp3:okhttp:3.11.0"
+    compile "com.squareup.okhttp3:okhttp:3.12.0"
 
     compile "com.rometools:rome:$rome_version"
     compile "com.rometools:rome-modules:$rome_version"
