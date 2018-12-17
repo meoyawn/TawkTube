@@ -1,14 +1,22 @@
 package adeln
 
 import com.rometools.rome.io.SyndFeedOutput
+import io.ktor.application.ApplicationCall
 import io.ktor.application.call
 import io.ktor.application.install
+import io.ktor.client.HttpClient
+import io.ktor.client.call.call
+import io.ktor.client.engine.cio.CIO
 import io.ktor.features.AutoHeadResponse
 import io.ktor.features.Compression
 import io.ktor.html.respondHtml
 import io.ktor.http.ContentType
+import io.ktor.http.Headers
 import io.ktor.http.HttpHeaders
+import io.ktor.http.HttpStatusCode
+import io.ktor.http.content.OutgoingContent
 import io.ktor.request.ApplicationRequest
+import io.ktor.response.respond
 import io.ktor.response.respondRedirect
 import io.ktor.response.respondText
 import io.ktor.routing.get
@@ -16,7 +24,10 @@ import io.ktor.routing.route
 import io.ktor.routing.routing
 import io.ktor.server.engine.embeddedServer
 import io.ktor.server.netty.Netty
+import io.ktor.util.filter
 import kotlinx.coroutines.asCoroutineDispatcher
+import kotlinx.coroutines.io.ByteWriteChannel
+import kotlinx.coroutines.io.copyAndClose
 import kotlinx.coroutines.withContext
 import kotlinx.html.HTML
 import kotlinx.html.InputType
@@ -57,6 +68,7 @@ fun mkClient(): OkHttpClient =
 
 val BLOCKING_IO = Executors.newCachedThreadPool().asCoroutineDispatcher()
 
+@io.ktor.util.KtorExperimentalAPI
 fun main(args: Array<String>) {
 
     val client = mkClient()
@@ -125,7 +137,7 @@ fun main(args: Array<String>) {
 
                 println("got audio $audio")
 
-                call.respondRedirect(audio.url.toString())
+                call.proxyYoutubeRequest(audio.url.toString())
             }
 
             route("/yandexdisk") {
@@ -151,6 +163,40 @@ fun ApplicationRequest.isBrowser(): Boolean =
 
 fun ApplicationRequest.player(): Player =
     if (isBrowser()) Player.BROWSER else Player.OTHER
+
+@io.ktor.util.KtorExperimentalAPI
+suspend fun ApplicationCall.proxyYoutubeRequest(url: String) {
+
+    try{
+
+        val httpClient = HttpClient(CIO)
+
+        // We create a GET request to the wikipedia domain and return the call (with the request and the unprocessed response).
+        val result = httpClient.call(url)
+
+        // Get the relevant headers of the client response.
+        val proxiedHeaders = result.response.headers
+        val contentType = proxiedHeaders[HttpHeaders.ContentType]
+        val contentLength = proxiedHeaders[HttpHeaders.ContentLength]
+
+        // We simply pipe it. We return a [OutgoingContent.WriteChannelContent]
+        // propagating the contentLength, the contentType and other headers, and simply we copy
+        // the ByteReadChannel from the HTTP client response, to the HTTP server ByteWriteChannel response.
+        respond(object : OutgoingContent.WriteChannelContent() {
+            override val contentLength: Long? = contentLength?.toLong()
+            override val contentType: ContentType? = contentType?.let { ContentType.parse(it) }
+            override val headers: Headers = Headers.build {
+                appendAll(proxiedHeaders.filter { key, _ -> !key.equals(HttpHeaders.ContentType, ignoreCase = true) && !key.equals(HttpHeaders.ContentLength, ignoreCase = true) })
+            }
+            override val status: HttpStatusCode? = result.response.status
+            override suspend fun writeTo(channel: ByteWriteChannel) {
+                result.response.content.copyAndClose(channel)
+            }
+        })
+    } catch (e: Exception) {
+        println(e)
+    }
+}
 
 private fun HTML.renderHome(url: String?, resolved: HttpUrl?) {
 

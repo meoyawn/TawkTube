@@ -43,9 +43,11 @@ dependencies {
     compile "com.google.apis:google-api-services-youtube:v3-rev205-1.25.0"
     compile "com.google.api-client:google-api-client-jackson2:1.25.0"
 
+    compile "io.ktor:ktor-client-core:$ktor_version"
+    compile "io.ktor:ktor-client-jetty:$ktor_version"
     compile "io.ktor:ktor-server-netty:$ktor_version"
     compile "io.ktor:ktor-html-builder:$ktor_version"
-//    compile "io.ktor:ktor-client-core:$ktor_version"
+    compile "io.ktor:ktor-client-cio:$ktor_version"
 
     compile "com.yandex.android:disk-restapi-sdk:1.03"
 
