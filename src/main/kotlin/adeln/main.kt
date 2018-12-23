@@ -170,29 +170,25 @@ fun Headers.without(headers: Set<String>): StringValues =
 
 suspend fun ApplicationCall.proxy(client: HttpClient, url: HttpUrl) {
 
-    val originalHeaders = request.headers
-    val result = client.call(url.toString()) {
-        headers.appendAll(originalHeaders.without(setOf(HttpHeaders.Host)))
-    }
+    val result =
+        client.call(url.toString()) { headers.appendAll(request.headers.without(setOf(HttpHeaders.Host))) }.response
 
-    val proxiedHeaders = result.response.headers
-    val contentType = proxiedHeaders[HttpHeaders.ContentType]
-    val contentLength = proxiedHeaders[HttpHeaders.ContentLength]
+    val resultHeaders = result.headers
 
     respond(object : OutgoingContent.WriteChannelContent() {
 
-        override val contentLength: Long? = contentLength?.toLong()
+        override val contentLength: Long? = resultHeaders[HttpHeaders.ContentLength]?.toLong()
 
-        override val contentType: ContentType? = contentType?.let { ContentType.parse(it) }
+        override val contentType: ContentType? = resultHeaders[HttpHeaders.ContentType]?.let { ContentType.parse(it) }
 
         override val headers: Headers = Headers.build {
-            appendAll(proxiedHeaders.without(setOf(HttpHeaders.ContentType, HttpHeaders.ContentLength)))
+            appendAll(resultHeaders.without(setOf(HttpHeaders.ContentType, HttpHeaders.ContentLength)))
         }
 
-        override val status: HttpStatusCode? = result.response.status
+        override val status: HttpStatusCode? = result.status
 
         override suspend fun writeTo(channel: ByteWriteChannel) {
-            result.response.content.copyAndClose(channel)
+            result.content.copyAndClose(channel)
         }
     })
 }
