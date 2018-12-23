@@ -6,7 +6,7 @@ import io.ktor.application.call
 import io.ktor.application.install
 import io.ktor.client.HttpClient
 import io.ktor.client.call.call
-import io.ktor.client.engine.cio.CIO
+import io.ktor.client.engine.apache.Apache
 import io.ktor.features.AutoHeadResponse
 import io.ktor.features.Compression
 import io.ktor.html.respondHtml
@@ -24,6 +24,7 @@ import io.ktor.routing.route
 import io.ktor.routing.routing
 import io.ktor.server.engine.embeddedServer
 import io.ktor.server.netty.Netty
+import io.ktor.util.StringValues
 import io.ktor.util.filter
 import kotlinx.coroutines.asCoroutineDispatcher
 import kotlinx.coroutines.io.ByteWriteChannel
@@ -68,13 +69,13 @@ fun mkClient(): OkHttpClient =
 
 val BLOCKING_IO = Executors.newCachedThreadPool().asCoroutineDispatcher()
 
-@io.ktor.util.KtorExperimentalAPI
 fun main(args: Array<String>) {
 
     val client = mkClient()
     val youtube = mkYoutube()
     val output = SyndFeedOutput()
     val yandexDisk = mkYandexDisk()
+    val ktorClient = HttpClient(Apache)
 
     embeddedServer(Netty, port = Config.PORT) {
 
@@ -137,7 +138,7 @@ fun main(args: Array<String>) {
 
                 println("got audio $audio")
 
-                call.proxyYoutubeRequest(audio.url.toString())
+                call.proxy(ktorClient, audio.url)
             }
 
             route("/yandexdisk") {
@@ -164,38 +165,36 @@ fun ApplicationRequest.isBrowser(): Boolean =
 fun ApplicationRequest.player(): Player =
     if (isBrowser()) Player.BROWSER else Player.OTHER
 
-@io.ktor.util.KtorExperimentalAPI
-suspend fun ApplicationCall.proxyYoutubeRequest(url: String) {
+fun Headers.without(headers: Set<String>): StringValues =
+    filter { key, _ -> headers.all { !it.equals(key, ignoreCase = true) } }
 
-    try{
+suspend fun ApplicationCall.proxy(client: HttpClient, url: HttpUrl) {
 
-        val httpClient = HttpClient(CIO)
-
-        // We create a GET request to the wikipedia domain and return the call (with the request and the unprocessed response).
-        val result = httpClient.call(url)
-
-        // Get the relevant headers of the client response.
-        val proxiedHeaders = result.response.headers
-        val contentType = proxiedHeaders[HttpHeaders.ContentType]
-        val contentLength = proxiedHeaders[HttpHeaders.ContentLength]
-
-        // We simply pipe it. We return a [OutgoingContent.WriteChannelContent]
-        // propagating the contentLength, the contentType and other headers, and simply we copy
-        // the ByteReadChannel from the HTTP client response, to the HTTP server ByteWriteChannel response.
-        respond(object : OutgoingContent.WriteChannelContent() {
-            override val contentLength: Long? = contentLength?.toLong()
-            override val contentType: ContentType? = contentType?.let { ContentType.parse(it) }
-            override val headers: Headers = Headers.build {
-                appendAll(proxiedHeaders.filter { key, _ -> !key.equals(HttpHeaders.ContentType, ignoreCase = true) && !key.equals(HttpHeaders.ContentLength, ignoreCase = true) })
-            }
-            override val status: HttpStatusCode? = result.response.status
-            override suspend fun writeTo(channel: ByteWriteChannel) {
-                result.response.content.copyAndClose(channel)
-            }
-        })
-    } catch (e: Exception) {
-        println(e)
+    val originalHeaders = request.headers
+    val result = client.call(url.toString()) {
+        headers.appendAll(originalHeaders.without(setOf(HttpHeaders.Host)))
     }
+
+    val proxiedHeaders = result.response.headers
+    val contentType = proxiedHeaders[HttpHeaders.ContentType]
+    val contentLength = proxiedHeaders[HttpHeaders.ContentLength]
+
+    respond(object : OutgoingContent.WriteChannelContent() {
+
+        override val contentLength: Long? = contentLength?.toLong()
+
+        override val contentType: ContentType? = contentType?.let { ContentType.parse(it) }
+
+        override val headers: Headers = Headers.build {
+            appendAll(proxiedHeaders.without(setOf(HttpHeaders.ContentType, HttpHeaders.ContentLength)))
+        }
+
+        override val status: HttpStatusCode? = result.response.status
+
+        override suspend fun writeTo(channel: ByteWriteChannel) {
+            result.response.content.copyAndClose(channel)
+        }
+    })
 }
 
 private fun HTML.renderHome(url: String?, resolved: HttpUrl?) {
