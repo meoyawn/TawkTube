@@ -1,6 +1,6 @@
 package adeln
 
-import com.google.api.client.http.javanet.NetHttpTransport
+import com.google.api.client.http.apache.ApacheHttpTransport
 import com.google.api.client.json.jackson2.JacksonFactory
 import com.google.api.client.util.DateTime
 import com.google.api.services.youtube.YouTube
@@ -42,23 +42,23 @@ data class Details(
 )
 
 fun link(id: VideoID): HttpUrl =
-    HttpUrl.parse("https://youtube.com/watch?v=${id.id}")!!
+    HttpUrl.get("https://youtube.com/watch?v=${id.id}")
 
 fun link(id: PlaylistID): HttpUrl =
-    HttpUrl.parse("https://youtube.com/playlist?list=${id.id}")!!
+    HttpUrl.get("https://youtube.com/playlist?list=${id.id}")
 
 fun link(channel: ChannelId): HttpUrl =
-    when (channel) {
+    HttpUrl.get(when (channel) {
         is ChannelId.ById ->
             "https://youtube.com/channel/${channel.id}"
 
         is ChannelId.ByName ->
             "https://youtube.com/user/${channel.name}"
-    }.let { HttpUrl.parse(it)!! }
+    })
 
 fun mkYoutube(): YouTube =
-    YouTube.Builder(NetHttpTransport(), JacksonFactory()) {}
-        .setApplicationName("TubeCast")
+    YouTube.Builder(ApacheHttpTransport(), JacksonFactory()) {}
+        .setApplicationName("TawkTube")
         .setYouTubeRequestInitializer(YouTubeRequestInitializer(Secrets.YT_KEY))
         .build()
 

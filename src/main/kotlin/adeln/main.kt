@@ -59,7 +59,7 @@ object Secrets {
 
 object Config {
     val PORT = System.getenv("PORT")?.toInt() ?: 8080
-    val HOST = HttpUrl.parse(System.getenv("HEROKU_URL") ?: "http://localhost:$PORT")!!
+    val HOST = HttpUrl.get(System.getenv("HEROKU_URL") ?: "http://localhost:$PORT")
 }
 
 fun mkClient(): OkHttpClient =
@@ -144,7 +144,7 @@ fun main(args: Array<String>) {
             route("/yandexdisk") {
 
                 get("/public") {
-                    val url = HttpUrl.parse(call.parameters["link"]!!)!!
+                    val url = HttpUrl.get(call.parameters["link"]!!)
                     val feed = yandexDisk.asFeed(url)
                     call.respondText(text = output.outputString(feed), contentType = ContentType.Application.Rss)
                 }
