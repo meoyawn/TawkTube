@@ -4,11 +4,12 @@ buildscript {
 
     ext {
         kotlin_version = '1.3.11'
-        rome_version = "1.11.1"
+        rome_version = "1.12.0"
         ktor_version = "1.0.1"
     }
 
     repositories {
+        mavenCentral()
         jcenter()
     }
     dependencies {
@@ -22,6 +23,7 @@ apply plugin: 'kotlin'
 apply plugin: "application"
 
 repositories {
+    mavenCentral()
     jcenter()
 }
 
@@ -33,15 +35,15 @@ dependencies {
     compile "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
     compile "org.jetbrains.kotlin:kotlin-reflect:$kotlin_version"
 
-    compile "org.jetbrains.kotlinx:kotlinx-coroutines-core:+"
+    compile "org.jetbrains.kotlinx:kotlinx-coroutines-core:1.1.0"
 
     compile "com.squareup.okhttp3:okhttp:3.12.0"
 
     compile "com.rometools:rome:$rome_version"
     compile "com.rometools:rome-modules:$rome_version"
 
-    compile "com.google.apis:google-api-services-youtube:v3-rev205-1.25.0"
-    compile "com.google.api-client:google-api-client-jackson2:1.25.0"
+    compile "com.google.apis:google-api-services-youtube:v3-rev20180511-1.27.0"
+    compile "com.google.api-client:google-api-client-jackson2:1.27.0"
 
     compile "io.ktor:ktor-server-netty:$ktor_version"
     compile "io.ktor:ktor-html-builder:$ktor_version"
