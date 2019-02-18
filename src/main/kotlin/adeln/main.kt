@@ -54,7 +54,7 @@ import okhttp3.OkHttpClient
 import java.util.concurrent.Executors
 
 object Secrets {
-    const val YT_KEY = "AIzaSyBXaU6RB0KwBFqEz5sdcyjXiNySefvUHLc"
+    const val SECRET = "AIzaSyDMKfYbet-kE1H8yApA9NvqyUrNgvjfJaM"
 }
 
 object Config {

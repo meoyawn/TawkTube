@@ -13,6 +13,7 @@ import retrofit.RestAdapter
 import retrofit.client.OkClient
 import java.net.URL
 import java.time.Duration
+import java.util.Date
 
 typealias YandexDisk = CloudApi
 
@@ -60,7 +61,7 @@ suspend fun YandexDisk.recursiveResource(publicKey: String, parent: Resource? = 
     val items = dir.resourceList.items
     val deepFiles = items.filter(Resource::isDir).flatMap {
         delay(Duration.ofMillis(300))
-        recursiveResource(it.publicKey, it).files
+        recursiveResource(publicKey = it.publicKey, parent = it).files
     }
     val flatFiles = items.filter(!Resource::isDir)
 
@@ -97,8 +98,15 @@ fun asEntry(res: Resource): SyndEntry =
         it.publishedDate = res.created
     }
 
-fun List<SyndEntry>.sortDates(): List<SyndEntry> =
-    zip(map { it.publishedDate }.sorted()) { entry, date -> entry.also { it.publishedDate = date } }
+fun List<SyndEntry>.sortDates(): List<SyndEntry> {
+    var theDate = minBy { it.publishedDate }?.publishedDate?.toInstant()
+    return sortedBy { it.title }.map {
+        it.apply {
+            publishedDate = theDate?.toEpochMilli()?.let(::Date)
+            theDate = theDate?.plusSeconds(1)
+        }
+    }
+}
 
 suspend fun YandexDisk.asFeed(url: HttpUrl): SyndFeed =
     rss20 {
