@@ -54,7 +54,7 @@ import okhttp3.OkHttpClient
 import java.util.concurrent.Executors
 
 object Secrets {
-    const val SECRET = "AIzaSyDMKfYbet-kE1H8yApA9NvqyUrNgvjfJaM"
+    const val SECRET = "AIzaSyDSYi3uLFAKXOThJ1JjZw2FkE0rdoMuYLQ"
 }
 
 object Config {
