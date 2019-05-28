@@ -6,6 +6,7 @@ import io.kotlintest.matchers.should
 import io.kotlintest.matchers.shouldEqual
 import kotlinx.coroutines.runBlocking
 import okhttp3.HttpUrl
+import org.junit.Ignore
 import org.junit.Test
 import java.net.URLEncoder
 
@@ -38,9 +39,10 @@ class Experiments {
     @Test
     fun instantRegret() {
         playlistEntries(mkYoutube(), PlaylistID("PLiQrdzH3aBWi6nh1kdbYfy2dd1CSOwBz5"), Player.BROWSER) should
-            haveSize(70)
+            haveSize(69)
     }
 
+    @Ignore("yandex too many requests")
     @Test
     fun demons() {
         runBlocking {
