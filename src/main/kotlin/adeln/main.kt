@@ -15,6 +15,8 @@ import io.ktor.http.Headers
 import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.content.OutgoingContent
+import io.ktor.http.content.resource
+import io.ktor.http.content.static
 import io.ktor.request.ApplicationRequest
 import io.ktor.response.respond
 import io.ktor.response.respondRedirect
@@ -83,6 +85,10 @@ fun main(args: Array<String>) {
         install(AutoHeadResponse)
 
         routing {
+
+            static {
+                resource("robots.txt")
+            }
 
             get("/") {
                 val url = call.parameters["url"]

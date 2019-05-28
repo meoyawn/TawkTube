@@ -1,0 +1,8 @@
+User-agent: *
+
+Disallow: /channel
+Disallow: /user
+Disallow: /playlist
+Disallow: /video
+Disallow: /audio
+Disallow: /yandexdisk/
