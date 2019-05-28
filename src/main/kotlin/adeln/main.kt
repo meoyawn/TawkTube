@@ -60,6 +60,7 @@ import java.time.Duration
 import java.time.Instant
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.Executors
+import java.util.concurrent.atomic.AtomicInteger
 
 object Secrets {
     const val SECRET = "AIzaSyDSYi3uLFAKXOThJ1JjZw2FkE0rdoMuYLQ"
@@ -141,6 +142,8 @@ fun main(args: Array<String>) {
             fun Pair<Instant, Audio>.valid(): Boolean =
                 Duration.between(first, Instant.now()) < Duration.ofMinutes(4)
 
+            val proxyCount = AtomicInteger(0)
+
             get("/audio") {
 
                 val videoId = VideoID(call.parameters["v"]!!)
@@ -159,10 +162,10 @@ fun main(args: Array<String>) {
                 }
 
                 try {
-                    println("proxy start $videoId")
+                    println("proxy start $videoId ${proxyCount.incrementAndGet()}")
                     call.proxy(ktorClient, audio.url)
                 } finally {
-                    println("proxy stop $videoId")
+                    println("proxy stop $videoId ${proxyCount.decrementAndGet()}")
                 }
             }
 
