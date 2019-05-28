@@ -203,8 +203,6 @@ suspend fun ApplicationCall.proxy(client: HttpClient, url: HttpUrl) {
 
     val resultHeaders = result.headers
 
-    println("proxy req ${request.headers.toMap()}")
-    println("proxy resp ${result.headers.toMap()}")
     respond(object : OutgoingContent.WriteChannelContent() {
 
         override val contentLength: Long? = resultHeaders[HttpHeaders.ContentLength]?.toLong()
@@ -218,7 +216,6 @@ suspend fun ApplicationCall.proxy(client: HttpClient, url: HttpUrl) {
         override val status: HttpStatusCode? = result.status
 
         override suspend fun writeTo(channel: ByteWriteChannel) {
-            println("writing proxy data")
             result.content.copyAndClose(channel)
         }
     })
