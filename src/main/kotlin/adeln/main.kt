@@ -55,6 +55,9 @@ import kotlinx.html.title
 import kotlinx.html.ul
 import okhttp3.HttpUrl
 import okhttp3.OkHttpClient
+import java.time.Duration
+import java.time.Instant
+import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.Executors
 
 object Secrets {
@@ -132,18 +135,27 @@ fun main(args: Array<String>) {
                 call.respondText(text = output.outputString(feed), contentType = ContentType.Application.Rss)
             }
 
+            val cache = ConcurrentHashMap<VideoID, Pair<Instant, Audio>>()
+
+            fun Pair<Instant, Audio>.valid(): Boolean =
+                Duration.between(first, Instant.now()) < Duration.ofMinutes(1)
+
             get("/audio") {
 
                 val videoId = VideoID(call.parameters["v"]!!)
 
-                println(call.request.uri)
-                println(call.request.headers.toMap().toList().joinToString(separator = "\n"))
+                val audio = cache[videoId]?.takeIf { it.valid() }?.second ?: run {
 
-                val player =
-                    if (call.request.isBrowser()) Player.BROWSER
-                    else Player.OTHER
+                    println(call.request.uri)
+                    println(call.request.headers.toMap().toList().joinToString(separator = "\n"))
 
-                val audio = audio(client, videoId, player)
+                    val player = when {
+                        call.request.isBrowser() -> Player.BROWSER
+                        else -> Player.OTHER
+                    }
+
+                    audio(client, videoId, player).also { cache[videoId] = Instant.now() to it }
+                }
 
                 println("got audio $audio")
 
