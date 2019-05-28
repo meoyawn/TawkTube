@@ -139,7 +139,7 @@ fun main(args: Array<String>) {
             val cache = ConcurrentHashMap<VideoID, Pair<Instant, Audio>>()
 
             fun Pair<Instant, Audio>.valid(): Boolean =
-                Duration.between(first, Instant.now()) < Duration.ofMinutes(1)
+                Duration.between(first, Instant.now()) < Duration.ofMinutes(4)
 
             get("/audio") {
 
@@ -147,7 +147,7 @@ fun main(args: Array<String>) {
 
                 val audio = cache[videoId]?.takeIf { it.valid() }?.second ?: run {
 
-                    println("${call.request.httpMethod} ${call.request.uri}")
+                    println("${call.request.httpMethod.value} ${call.request.uri}")
                     println(call.request.headers.toMap().toList().joinToString(separator = "\n"))
 
                     val player = when {
@@ -158,9 +158,12 @@ fun main(args: Array<String>) {
                     audio(client, videoId, player).also { cache[videoId] = Instant.now() to it }
                 }
 
-                println("got audio $audio")
-
-                call.proxy(ktorClient, audio.url)
+                try {
+                    println("proxy start $videoId")
+                    call.proxy(ktorClient, audio.url)
+                } finally {
+                    println("proxy stop $videoId")
+                }
             }
 
             route("/yandexdisk") {
