@@ -5,7 +5,7 @@ import okhttp3.OkHttpClient
 import okhttp3.Request
 import java.net.URLDecoder
 
-private val GET_VIDEO_INFO: HttpUrl = HttpUrl.get("http://www.youtube.com/get_video_info")
+private val GET_VIDEO_INFO: HttpUrl = HttpUrl.get("https://www.youtube.com/get_video_info")
 
 fun videoInfoUrl(videoID: VideoID): HttpUrl =
     GET_VIDEO_INFO.newBuilder()
