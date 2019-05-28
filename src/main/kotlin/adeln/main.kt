@@ -18,6 +18,7 @@ import io.ktor.http.content.OutgoingContent
 import io.ktor.http.content.resource
 import io.ktor.http.content.static
 import io.ktor.request.ApplicationRequest
+import io.ktor.request.uri
 import io.ktor.response.respond
 import io.ktor.response.respondRedirect
 import io.ktor.response.respondText
@@ -28,6 +29,7 @@ import io.ktor.server.engine.embeddedServer
 import io.ktor.server.netty.Netty
 import io.ktor.util.StringValues
 import io.ktor.util.filter
+import io.ktor.util.toMap
 import kotlinx.coroutines.asCoroutineDispatcher
 import kotlinx.coroutines.io.ByteWriteChannel
 import kotlinx.coroutines.io.copyAndClose
@@ -134,7 +136,8 @@ fun main(args: Array<String>) {
 
                 val videoId = VideoID(call.parameters["v"]!!)
 
-                println("getting audio for ${call.request.headers[HttpHeaders.UserAgent]}")
+                println(call.request.uri)
+                println(call.request.headers.toMap().toList().joinToString(separator = "\n"))
 
                 val player =
                     if (call.request.isBrowser()) Player.BROWSER
