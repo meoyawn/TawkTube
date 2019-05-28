@@ -18,6 +18,7 @@ import io.ktor.http.content.OutgoingContent
 import io.ktor.http.content.resource
 import io.ktor.http.content.static
 import io.ktor.request.ApplicationRequest
+import io.ktor.request.httpMethod
 import io.ktor.request.uri
 import io.ktor.response.respond
 import io.ktor.response.respondRedirect
@@ -146,7 +147,7 @@ fun main(args: Array<String>) {
 
                 val audio = cache[videoId]?.takeIf { it.valid() }?.second ?: run {
 
-                    println(call.request.uri)
+                    println("${call.request.httpMethod} ${call.request.uri}")
                     println(call.request.headers.toMap().toList().joinToString(separator = "\n"))
 
                     val player = when {
