@@ -43,7 +43,7 @@ import kotlinx.html.br
 import kotlinx.html.div
 import kotlinx.html.form
 import kotlinx.html.h2
-import kotlinx.html.h3
+import kotlinx.html.h4
 import kotlinx.html.head
 import kotlinx.html.input
 import kotlinx.html.lang
@@ -256,6 +256,10 @@ private fun HTML.renderHome(url: String?, resolved: HttpUrl?) {
 
             h2 { +title }
 
+            p { +"YouTube to podcast converter" }
+
+            h4 { +"Usage" }
+
             p { +"Paste a link to a:" }
 
             ul {
@@ -300,15 +304,13 @@ private fun HTML.renderHome(url: String?, resolved: HttpUrl?) {
                     p { +"Failed to resolve that url. You can ping me: comrade.adeln@ya.ru" }
             }
 
-            p {
-                a(href = "https://github.com/adelnizamutdinov/youtube-rss") { +"Source code" }
-            }
+            br
 
-            h3 {
-                +"Support"
-            }
+            h4 { +"Money tawk" }
 
-            a(classes = "btn btn-primary", href = "https://www.paypal.me/adelniz") {
+            p { +"You can support the development of this" }
+
+            a(classes = "btn btn-primary mr-1", href = "https://www.paypal.me/adelniz") {
                 role = "button"
 
                 +"PayPal"
@@ -318,6 +320,13 @@ private fun HTML.renderHome(url: String?, resolved: HttpUrl?) {
                 role = "button"
 
                 +"Patreon"
+            }
+
+            br
+            br
+
+            p {
+                a(href = "https://github.com/adelnizamutdinov/youtube-rss") { +"Source code" }
             }
         }
     }
