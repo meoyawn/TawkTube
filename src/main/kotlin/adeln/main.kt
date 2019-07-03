@@ -9,6 +9,7 @@ import io.ktor.client.call.call
 import io.ktor.client.engine.apache.Apache
 import io.ktor.features.AutoHeadResponse
 import io.ktor.features.Compression
+import io.ktor.features.StatusPages
 import io.ktor.html.respondHtml
 import io.ktor.http.ContentType
 import io.ktor.http.Headers
@@ -91,6 +92,26 @@ fun main(args: Array<String>) {
         install(Compression)
         install(AutoHeadResponse)
 
+        val oks = AtomicInteger(0)
+        val errs = AtomicInteger(0)
+
+        fun printErrStats() {
+            val errNum = errs.get()
+            val percent = errNum.toFloat() / (oks.get() + errNum) * 100
+            println("$percent% errors")
+        }
+
+        install(StatusPages) {
+            status(HttpStatusCode.OK) {
+                oks.incrementAndGet()
+                printErrStats()
+            }
+            status(HttpStatusCode.InternalServerError) {
+                errs.incrementAndGet()
+                printErrStats()
+            }
+        }
+
         routing {
 
             static {
@@ -142,8 +163,6 @@ fun main(args: Array<String>) {
             fun Pair<Instant, Audio>.valid(): Boolean =
                 Duration.between(first, Instant.now()) < Duration.ofMinutes(4)
 
-            val proxyCount = AtomicInteger(0)
-
             get("/audio") {
 
                 val videoId = VideoID(call.parameters["v"]!!)
@@ -161,12 +180,7 @@ fun main(args: Array<String>) {
                     audio(client, videoId, player).also { cache[videoId] = Instant.now() to it }
                 }
 
-                try {
-                    println("proxy start $videoId ${proxyCount.incrementAndGet()}")
-                    call.proxy(ktorClient, audio.url)
-                } finally {
-                    println("proxy stop $videoId ${proxyCount.decrementAndGet()}")
-                }
+                call.proxy(ktorClient, audio.url)
             }
 
             route("/yandexdisk") {
