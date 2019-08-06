@@ -5,7 +5,7 @@ import io.kotlintest.matchers.haveSize
 import io.kotlintest.matchers.should
 import io.kotlintest.matchers.shouldEqual
 import kotlinx.coroutines.runBlocking
-import okhttp3.HttpUrl
+import okhttp3.HttpUrl.Companion.toHttpUrl
 import org.junit.Ignore
 import org.junit.Test
 import java.net.URLEncoder
@@ -14,26 +14,25 @@ class Experiments {
 
     @Test
     fun disk() {
-        val diskLink = "https://yadi.sk/d/I5HDo-VY3R4Bvn"
-        resolve(HttpUrl.parse(diskLink)!!) shouldEqual
-            HttpUrl.parse("http://localhost:8080/yandexdisk/public?link=${URLEncoder.encode(diskLink, "utf-8")}")
+        resolve("https://yadi.sk/d/I5HDo-VY3R4Bvn".toHttpUrl()) shouldEqual
+            "http://localhost:8080/yandexdisk/public?link=${URLEncoder.encode("https://yadi.sk/d/I5HDo-VY3R4Bvn", "utf-8")}".toHttpUrl()
     }
 
     @Test
     fun video() {
-        resolve(HttpUrl.parse("https://www.youtube.com/watch?v=g2tyOLvArw0")!!) shouldEqual
-            HttpUrl.parse("http://localhost:8080/video?v=g2tyOLvArw0")
+        resolve("https://www.youtube.com/watch?v=g2tyOLvArw0".toHttpUrl()) shouldEqual
+            "http://localhost:8080/video?v=g2tyOLvArw0".toHttpUrl()
     }
 
     @Test
     fun audioUrl() {
-        audioUrl(VideoID("ha")) shouldEqual HttpUrl.parse("http://localhost:8080/audio?v=ha")
+        audioUrl(VideoID("ha")) shouldEqual "http://localhost:8080/audio?v=ha".toHttpUrl()
     }
 
     @Test
     fun mobileYt() {
-        resolve(HttpUrl.parse("https://m.youtube.com/playlist?list=PLE7DDD91010BC51F8")!!) shouldEqual
-            HttpUrl.parse("http://localhost:8080/playlist?list=PLE7DDD91010BC51F8")
+        resolve("https://m.youtube.com/playlist?list=PLE7DDD91010BC51F8".toHttpUrl()) shouldEqual
+            "http://localhost:8080/playlist?list=PLE7DDD91010BC51F8".toHttpUrl()
     }
 
     @Test
@@ -46,7 +45,7 @@ class Experiments {
     @Test
     fun demons() {
         runBlocking {
-            SyndFeedOutput().outputString(mkYandexDisk().asFeed(HttpUrl.parse("https://yadi.sk/d/4OHFuxV93Xn7H6")!!))
+            SyndFeedOutput().outputString(mkYandexDisk().asFeed("https://yadi.sk/d/4OHFuxV93Xn7H6".toHttpUrl()))
         }
     }
 }

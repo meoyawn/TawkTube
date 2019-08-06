@@ -15,6 +15,7 @@ import com.google.api.services.youtube.model.VideoContentDetails
 import com.google.api.services.youtube.model.VideoSnippet
 import com.rometools.rome.feed.synd.SyndEntry
 import okhttp3.HttpUrl
+import okhttp3.HttpUrl.Companion.toHttpUrl
 import java.util.Date
 
 data class VideoID(val id: String)
@@ -42,19 +43,19 @@ data class Details(
 )
 
 fun link(id: VideoID): HttpUrl =
-    HttpUrl.get("https://youtube.com/watch?v=${id.id}")
+    "https://youtube.com/watch?v=${id.id}".toHttpUrl()
 
 fun link(id: PlaylistID): HttpUrl =
-    HttpUrl.get("https://youtube.com/playlist?list=${id.id}")
+    "https://youtube.com/playlist?list=${id.id}".toHttpUrl()
 
 fun link(channel: ChannelId): HttpUrl =
-    HttpUrl.get(when (channel) {
+    when (channel) {
         is ChannelId.ById ->
             "https://youtube.com/channel/${channel.id}"
 
         is ChannelId.ByName ->
             "https://youtube.com/user/${channel.name}"
-    })
+    }.toHttpUrl()
 
 fun mkYoutube(): YouTube =
     YouTube.Builder(ApacheHttpTransport(), JacksonFactory()) {}

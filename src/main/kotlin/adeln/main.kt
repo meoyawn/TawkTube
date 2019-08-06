@@ -9,7 +9,6 @@ import io.ktor.client.call.call
 import io.ktor.client.engine.apache.Apache
 import io.ktor.features.AutoHeadResponse
 import io.ktor.features.Compression
-import io.ktor.features.StatusPages
 import io.ktor.html.respondHtml
 import io.ktor.http.ContentType
 import io.ktor.http.Headers
@@ -56,12 +55,13 @@ import kotlinx.html.role
 import kotlinx.html.title
 import kotlinx.html.ul
 import okhttp3.HttpUrl
+import okhttp3.HttpUrl.Companion.toHttpUrl
+import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
 import okhttp3.OkHttpClient
 import java.time.Duration
 import java.time.Instant
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.Executors
-import java.util.concurrent.atomic.AtomicInteger
 
 object Secrets {
     const val SECRET = "AIzaSyDSYi3uLFAKXOThJ1JjZw2FkE0rdoMuYLQ"
@@ -69,7 +69,7 @@ object Secrets {
 
 object Config {
     val PORT = System.getenv("PORT")?.toInt() ?: 8080
-    val HOST = HttpUrl.get(System.getenv("HEROKU_URL") ?: "http://localhost:$PORT")
+    val HOST = (System.getenv("HEROKU_URL") ?: "http://localhost:$PORT").toHttpUrl()
 }
 
 fun mkClient(): OkHttpClient =
@@ -92,26 +92,6 @@ fun main(args: Array<String>) {
         install(Compression)
         install(AutoHeadResponse)
 
-        val oks = AtomicInteger(0)
-        val errs = AtomicInteger(0)
-
-        fun printErrStats() {
-            val errNum = errs.get()
-            val percent = errNum.toFloat() / (oks.get() + errNum) * 100
-            println("$percent% errors")
-        }
-
-        install(StatusPages) {
-            status(HttpStatusCode.OK) {
-                oks.incrementAndGet()
-                printErrStats()
-            }
-            status(HttpStatusCode.InternalServerError) {
-                errs.incrementAndGet()
-                printErrStats()
-            }
-        }
-
         routing {
 
             static {
@@ -120,7 +100,7 @@ fun main(args: Array<String>) {
 
             get("/") {
                 val url = call.parameters["url"]
-                val resolved = url?.let(HttpUrl::parse)?.let(::resolve)
+                val resolved = url?.toHttpUrlOrNull()?.let(::resolve)
 
                 call.respondHtml {
                     renderHome(url, resolved)
@@ -132,7 +112,7 @@ fun main(args: Array<String>) {
 
                 val feed = withContext(BLOCKING_IO) { asFeed(youtube, channelId, call.request.player()) }
 
-                call.respondText(text = output.outputString(feed), contentType = ContentType.Application.Rss)
+                call.respondText(text = output.outputString(feed))
             }
 
             get("/user/{username}") {
@@ -140,7 +120,7 @@ fun main(args: Array<String>) {
 
                 val feed = withContext(BLOCKING_IO) { asFeed(youtube, username, call.request.player()) }
 
-                call.respondText(text = output.outputString(feed), contentType = ContentType.Application.Rss)
+                call.respondText(text = output.outputString(feed))
             }
 
             get("/playlist") {
@@ -148,14 +128,14 @@ fun main(args: Array<String>) {
 
                 val feed = withContext(BLOCKING_IO) { asFeed(youtube, playlistId, call.request.player()) }
 
-                call.respondText(text = output.outputString(feed), contentType = ContentType.Application.Rss)
+                call.respondText(text = output.outputString(feed))
             }
 
             get("/video") {
                 val videoId = VideoID(call.parameters["v"]!!)
 
                 val feed = asFeed(youtube, videoId, call.request.player())
-                call.respondText(text = output.outputString(feed), contentType = ContentType.Application.Rss)
+                call.respondText(text = output.outputString(feed))
             }
 
             val cache = ConcurrentHashMap<VideoID, Pair<Instant, Audio>>()
@@ -186,18 +166,20 @@ fun main(args: Array<String>) {
             route("/yandexdisk") {
 
                 get("/public") {
-                    val url = HttpUrl.get(call.parameters["link"]!!)
+                    val url = call.parameters["link"]!!.toHttpUrl()
                     val feed = yandexDisk.asFeed(url)
-                    call.respondText(text = output.outputString(feed), contentType = ContentType.Application.Rss)
+                    call.respondText(text = output.outputString(feed))
                 }
 
                 get("/audio") {
                     val publicKey = call.parameters["publicKey"]!!
                     val path = call.parameters["path"]!!
-                    call.respondRedirect(yandexDisk.getPublicResourceDownloadLink(publicKey, path).href)
+                    call.respondRedirect(url = yandexDisk.getPublicResourceDownloadLink(publicKey, path).href)
                 }
             }
         }
+
+        Unit
     }.start(wait = true)
 }
 

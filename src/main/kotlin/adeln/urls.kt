@@ -3,7 +3,7 @@ package adeln
 import okhttp3.HttpUrl
 
 fun resolve(url: HttpUrl): HttpUrl? =
-    when (url.host()) {
+    when (url.host) {
         "youtube.com", "www.youtube.com", "m.youtube.com" ->
             resolveYt(url)
 
@@ -18,7 +18,7 @@ fun resolve(url: HttpUrl): HttpUrl? =
     }
 
 fun resolveShortYt(url: HttpUrl): HttpUrl? =
-    url.pathSegments().lastOrNull()?.takeIf(String::isNotBlank)?.let { buildVideo(VideoID(it)) }
+    url.pathSegments.lastOrNull()?.takeIf(String::isNotBlank)?.let { buildVideo(VideoID(it)) }
 
 fun buildYaDisk(url: HttpUrl): HttpUrl =
     Config.HOST.newBuilder()
@@ -30,8 +30,8 @@ fun buildYaDisk(url: HttpUrl): HttpUrl =
 fun resolveYt(url: HttpUrl): HttpUrl? =
     url.queryParameter("v")?.takeIf(String::isNotBlank)?.let { buildVideo(VideoID(it)) }
         ?: url.queryParameter("list")?.takeIf(String::isNotBlank)?.let { buildPlaylist(PlaylistID(it)) }
-        ?: url.pathSegments().takeIf { "channel" in it }?.last()?.takeIf(String::isNotBlank)?.let { buildChannel(ChannelId.ById(it)) }
-        ?: url.pathSegments().takeIf { "user" in it }?.last()?.takeIf(String::isNotBlank)?.let { buildUser(ChannelId.ByName(it)) }
+        ?: url.pathSegments.takeIf { "channel" in it }?.last()?.takeIf(String::isNotBlank)?.let { buildChannel(ChannelId.ById(it)) }
+        ?: url.pathSegments.takeIf { "user" in it }?.last()?.takeIf(String::isNotBlank)?.let { buildUser(ChannelId.ByName(it)) }
 
 fun buildVideo(videoID: VideoID): HttpUrl =
     Config.HOST.newBuilder()

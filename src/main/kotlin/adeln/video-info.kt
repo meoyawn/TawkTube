@@ -1,11 +1,12 @@
 package adeln
 
 import okhttp3.HttpUrl
+import okhttp3.HttpUrl.Companion.toHttpUrl
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import java.net.URLDecoder
 
-private val GET_VIDEO_INFO: HttpUrl = HttpUrl.get("https://www.youtube.com/get_video_info")
+private val GET_VIDEO_INFO: HttpUrl = "https://www.youtube.com/get_video_info".toHttpUrl()
 
 fun videoInfoUrl(videoID: VideoID): HttpUrl =
     GET_VIDEO_INFO.newBuilder()
@@ -52,7 +53,7 @@ fun playerType(type: MimeType, player: Player): Boolean =
 fun audio(client: OkHttpClient, videoID: VideoID, player: Player): Audio =
     client.newCall(videoInfoRequest(videoID))
         .execute()
-        .body()!!
+        .body!!
         .string()
         .split("&")
         .asSequence()
@@ -69,7 +70,7 @@ fun audio(client: OkHttpClient, videoID: VideoID, player: Player): Audio =
 
                     Audio(
                         type = m["type"]!!,
-                        url = HttpUrl.get(m["url"]!!),
+                        url = m["url"]!!.toHttpUrl(),
                         bitrate = m["bitrate"]!!.toFloat(),
                         lengthSeconds = map["length_seconds"]!!.toLong()
                     )

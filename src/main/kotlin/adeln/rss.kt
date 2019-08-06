@@ -25,7 +25,7 @@ inline fun entry(f: (SyndEntryImpl) -> Unit): SyndEntryImpl =
     SyndEntryImpl().also(f)
 
 inline fun mediaContent(url: HttpUrl, f: (MediaContent) -> Unit): MediaContent =
-    MediaContent(UrlReference(url.uri())).also(f)
+    MediaContent(UrlReference(url.toUri())).also(f)
 
 inline fun rss20(f: (SyndFeedImpl) -> Unit): SyndFeedImpl =
     SyndFeedImpl(Channel(RSS20Generator().type)).also(f)
