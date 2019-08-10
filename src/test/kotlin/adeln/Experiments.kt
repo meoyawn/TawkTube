@@ -52,6 +52,8 @@ class Experiments {
 
     @Test
     fun audio() {
-        audio(OkHttpClient(), VideoID("Wex12GhUFqE"), Player.BROWSER).type shouldEqual """audio/webm; codecs="opus""""
+        runBlocking {
+            audio(OkHttpClient(), VideoID("Wex12GhUFqE"), Player.BROWSER).type shouldEqual """audio/webm; codecs="opus""""
+        }
     }
 }

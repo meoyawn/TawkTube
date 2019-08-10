@@ -1,10 +1,16 @@
 package adeln
 
+import kotlinx.coroutines.suspendCancellableCoroutine
+import okhttp3.Call
+import okhttp3.Callback
 import okhttp3.HttpUrl
 import okhttp3.HttpUrl.Companion.toHttpUrl
 import okhttp3.OkHttpClient
 import okhttp3.Request
+import okhttp3.Response
+import java.io.IOException
 import java.net.URLDecoder
+import kotlin.coroutines.resumeWithException
 
 private val GET_VIDEO_INFO: HttpUrl = "https://www.youtube.com/get_video_info".toHttpUrl()
 
@@ -49,9 +55,23 @@ fun playerType(type: MimeType, player: Player): Boolean =
             "webm" !in type
     }
 
-fun audio(client: OkHttpClient, videoID: VideoID, player: Player): Audio =
+suspend fun Call.await(): Response =
+    suspendCancellableCoroutine { cont ->
+        cont.invokeOnCancellation { cancel() }
+
+        enqueue(object : Callback {
+            override fun onFailure(call: Call, e: IOException): Unit =
+                cont.resumeWithException(e)
+
+            @Suppress("EXPERIMENTAL_API_USAGE")
+            override fun onResponse(call: Call, response: Response): Unit =
+                cont.resume(response) { response.close() }
+        })
+    }
+
+suspend fun audio(client: OkHttpClient, videoID: VideoID, player: Player): Audio =
     client.newCall(videoInfoRequest(videoID))
-        .execute()
+        .await()
         .body!!
         .string()
         .split("&")
