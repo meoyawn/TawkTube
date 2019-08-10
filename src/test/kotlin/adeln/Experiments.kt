@@ -6,6 +6,7 @@ import io.kotlintest.matchers.should
 import io.kotlintest.matchers.shouldEqual
 import kotlinx.coroutines.runBlocking
 import okhttp3.HttpUrl.Companion.toHttpUrl
+import okhttp3.OkHttpClient
 import org.junit.Ignore
 import org.junit.Test
 import java.net.URLEncoder
@@ -47,5 +48,10 @@ class Experiments {
         runBlocking {
             SyndFeedOutput().outputString(mkYandexDisk().asFeed("https://yadi.sk/d/4OHFuxV93Xn7H6".toHttpUrl()))
         }
+    }
+
+    @Test
+    fun audio() {
+        audio(OkHttpClient(), VideoID("Wex12GhUFqE"), Player.BROWSER).type shouldEqual """audio/webm; codecs="opus""""
     }
 }

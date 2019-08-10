@@ -26,8 +26,7 @@ typealias MimeType = String
 data class Audio(
     val type: MimeType,
     val url: HttpUrl,
-    val bitrate: Float,
-    val lengthSeconds: Long
+    val bitrate: Float
 )
 
 enum class Player {
@@ -71,8 +70,7 @@ fun audio(client: OkHttpClient, videoID: VideoID, player: Player): Audio =
                     Audio(
                         type = m["type"]!!,
                         url = m["url"]!!.toHttpUrl(),
-                        bitrate = m["bitrate"]!!.toFloat(),
-                        lengthSeconds = map["length_seconds"]!!.toLong()
+                        bitrate = m["bitrate"]!!.toFloat()
                     )
                 }
 
