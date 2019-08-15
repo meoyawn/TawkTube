@@ -120,6 +120,7 @@ suspend fun YandexDisk.asFeed(url: HttpUrl): SyndFeed =
         )
 
         it.title = dir.name
+        it.author = "Yandex.Disk"
         it.description = dir.publicUrl
         it.link = dir.publicUrl
         it.publishedDate = dir.created
