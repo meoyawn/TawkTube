@@ -114,13 +114,13 @@ suspend fun YandexDisk.asFeed(url: HttpUrl): SyndFeed =
 
         it.modules = mutableListOf(
             itunes {
+                it.author = "Yandex.Disk & TawkTube"
                 it.image = files.find { it.mediaType == "image" }?.preview?.let { URL(it) }
             },
             dc { }
         )
 
         it.title = dir.name
-        it.author = "Yandex.Disk"
         it.description = dir.publicUrl
         it.link = dir.publicUrl
         it.publishedDate = dir.created
