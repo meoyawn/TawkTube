@@ -1,5 +1,6 @@
 package adeln
 
+import com.google.api.client.googleapis.json.GoogleJsonResponseException
 import com.google.api.client.http.apache.ApacheHttpTransport
 import com.google.api.client.json.jackson2.JacksonFactory
 import com.google.api.client.util.DateTime
@@ -71,21 +72,25 @@ fun ThumbnailDetails.best(): Thumbnail? =
 fun DateTime.toDate(): Date =
     Date(value)
 
-fun playlistEntries(yt: YouTube, playlistID: PlaylistID, player: Player): List<SyndEntry> {
-    val full = paging<PlaylistVideos, String>(
-        load = { yt.playlistVideos(playlistID, pageToken = it) },
-        nextPage = { it.items.nextPageToken },
-        limit = 18
-    )
+// null means 404
+fun playlistEntries(yt: YouTube, playlistID: PlaylistID, player: Player): List<SyndEntry>? =
+    try {
+        val full = paging<PlaylistVideos, String>(
+            load = { yt.playlistVideos(playlistID, pageToken = it) },
+            nextPage = { it.items.nextPageToken },
+            limit = 18
+        )
 
-    val items = full.flatMap { it.items.items }
-    val details = full.flatMap { it.videos }
+        val items = full.flatMap { it.items.items }
+        val details = full.flatMap { it.videos }
 
-    return details.map { detail ->
-        val snippet = items.first { it.snippet.resourceId.videoId == detail.id.id }
-        entry(video = snippet.snippet.toVideo(), audio = detail.details, player = player)
+        details.map { detail ->
+            val snippet = items.first { it.snippet.resourceId.videoId == detail.id.id }
+            entry(video = snippet.snippet.toVideo(), audio = detail.details, player = player)
+        }
+    } catch (e: GoogleJsonResponseException) {
+        null
     }
-}
 
 private fun YouTube.playlistItems(playlistID: PlaylistID, pageToken: String?): PlaylistItemListResponse =
     playlistItems()
@@ -106,14 +111,14 @@ fun YouTube.playlistVideos(playlistID: PlaylistID, pageToken: String?): Playlist
     return PlaylistVideos(items, videos)
 }
 
-fun YouTube.playlistInfo(playlistID: PlaylistID): PlaylistSnippet =
+fun YouTube.playlistInfo(playlistID: PlaylistID): PlaylistSnippet? =
     playlists()
         .list("snippet")
         .setId(playlistID.id)
         .execute()
         .items
-        .first()
-        .snippet
+        .firstOrNull()
+        ?.snippet
 
 fun YouTube.videoInfo(id: VideoID): YtVideo =
     videos()

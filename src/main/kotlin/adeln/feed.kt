@@ -75,10 +75,10 @@ fun asFeed(yt: YouTube, videoID: VideoID, player: Player): SyndFeed =
         it.entries = listOf(entry(video, audio, player))
     }
 
-fun asFeed(yt: YouTube, playlistID: PlaylistID, player: Player): SyndFeed =
-    rss20 {
-        val playlist = yt.playlistInfo(playlistID)
+fun asFeed(yt: YouTube, playlistID: PlaylistID, player: Player): SyndFeed? {
+    val playlist = yt.playlistInfo(playlistID) ?: return null
 
+    return rss20 {
         it.modules = mutableListOf(
             itunes {
                 it.image = playlist.thumbnails.best()?.url?.let(::URL)
@@ -94,6 +94,7 @@ fun asFeed(yt: YouTube, playlistID: PlaylistID, player: Player): SyndFeed =
         it.author = playlist.channelTitle
         it.entries = playlistEntries(yt, playlistID, player)
     }
+}
 
 fun asFeed(yt: YouTube, channelID: ChannelId, player: Player): SyndFeed? =
     rss20 {

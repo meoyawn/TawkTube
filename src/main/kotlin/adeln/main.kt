@@ -9,6 +9,7 @@ import io.ktor.client.call.call
 import io.ktor.client.engine.apache.Apache
 import io.ktor.features.AutoHeadResponse
 import io.ktor.features.Compression
+import io.ktor.features.MissingRequestParameterException
 import io.ktor.html.respondHtml
 import io.ktor.http.ContentType
 import io.ktor.http.Headers
@@ -28,10 +29,11 @@ import io.ktor.routing.route
 import io.ktor.routing.routing
 import io.ktor.server.engine.embeddedServer
 import io.ktor.server.netty.Netty
+import io.ktor.util.KtorExperimentalAPI
 import io.ktor.util.StringValues
 import io.ktor.util.filter
 import io.ktor.util.toMap
-import kotlinx.coroutines.asCoroutineDispatcher
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.io.ByteWriteChannel
 import kotlinx.coroutines.io.copyAndClose
 import kotlinx.coroutines.withContext
@@ -61,7 +63,6 @@ import okhttp3.OkHttpClient
 import java.time.Duration
 import java.time.Instant
 import java.util.concurrent.ConcurrentHashMap
-import java.util.concurrent.Executors
 
 object Secrets {
     const val SECRET = "AIzaSyDSYi3uLFAKXOThJ1JjZw2FkE0rdoMuYLQ"
@@ -77,9 +78,8 @@ fun mkClient(): OkHttpClient =
         .followRedirects(true)
         .build()
 
-val BLOCKING_IO = Executors.newCachedThreadPool().asCoroutineDispatcher()
-
-fun main(args: Array<String>) {
+@KtorExperimentalAPI
+fun main() {
 
     val client = mkClient()
     val youtube = mkYoutube()
@@ -110,7 +110,7 @@ fun main(args: Array<String>) {
             get("/channel/{channelId}") {
                 val channelId = ChannelId.ById(call.parameters["channelId"]!!)
 
-                val feed = withContext(BLOCKING_IO) { asFeed(youtube, channelId, call.request.player()) }
+                val feed = withContext(Dispatchers.IO) { asFeed(youtube, channelId, call.request.player()) }
 
                 call.respondText(text = output.outputString(feed))
             }
@@ -118,17 +118,17 @@ fun main(args: Array<String>) {
             get("/user/{username}") {
                 val username = ChannelId.ByName(call.parameters["username"]!!)
 
-                val feed = withContext(BLOCKING_IO) { asFeed(youtube, username, call.request.player()) }
+                val feed = withContext(Dispatchers.IO) { asFeed(youtube, username, call.request.player()) }
 
                 call.respondText(text = output.outputString(feed))
             }
 
             get("/playlist") {
-                val playlistId = PlaylistID(call.parameters["list"]!!)
+                val playlistId = PlaylistID(call.parameters["list"] ?: throw MissingRequestParameterException("list"))
 
-                val feed = withContext(BLOCKING_IO) { asFeed(youtube, playlistId, call.request.player()) }
-
-                call.respondText(text = output.outputString(feed))
+                withContext(Dispatchers.IO) { asFeed(youtube, playlistId, call.request.player()) }
+                    ?.let { call.respondText(text = output.outputString(it)) }
+                    ?: call.respond(HttpStatusCode.NotFound, "not found")
             }
 
             get("/video") {
@@ -174,7 +174,9 @@ fun main(args: Array<String>) {
                 get("/audio") {
                     val publicKey = call.parameters["publicKey"]!!
                     val path = call.parameters["path"]!!
-                    call.respondRedirect(url = yandexDisk.getPublicResourceDownloadLink(publicKey, path).href)
+                    withContext(Dispatchers.IO) {
+                        call.respondRedirect(url = yandexDisk.getPublicResourceDownloadLink(publicKey, path).href)
+                    }
                 }
             }
         }

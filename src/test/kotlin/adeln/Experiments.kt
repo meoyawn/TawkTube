@@ -3,6 +3,7 @@ package adeln
 import com.rometools.rome.io.SyndFeedOutput
 import io.kotlintest.matchers.haveSize
 import io.kotlintest.matchers.should
+import io.kotlintest.matchers.shouldBe
 import io.kotlintest.matchers.shouldEqual
 import kotlinx.coroutines.runBlocking
 import okhttp3.HttpUrl.Companion.toHttpUrl
@@ -38,8 +39,13 @@ class Experiments {
 
     @Test
     fun instantRegret() {
-        playlistEntries(mkYoutube(), PlaylistID("PLiQrdzH3aBWi6nh1kdbYfy2dd1CSOwBz5"), Player.BROWSER) should
-            haveSize(69)
+        playlistEntries(mkYoutube(), PlaylistID("PLiQrdzH3aBWi6nh1kdbYfy2dd1CSOwBz5"), Player.BROWSER)!! should haveSize(69)
+    }
+
+    @Test
+    fun bug34() {
+        asFeed(mkYoutube(), PlaylistID("PLrxx1RzoWiyyfhkk84Vkz6XYaLrY6HMdDA"), Player.BROWSER) shouldBe null
+        playlistEntries(mkYoutube(), PlaylistID("PLrxx1RzoWiyyfhkk84Vkz6XYaLrY6HMdDA"), Player.BROWSER) shouldBe null
     }
 
     @Ignore("yandex too many requests")
