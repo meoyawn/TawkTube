@@ -27,6 +27,14 @@ class Experiments {
     }
 
     @Test
+    fun channel() {
+        resolve("https://www.youtube.com/channel/UC5CHszV2kJxVHHCP7uJQzBg".toHttpUrl()) shouldEqual
+            "http://localhost:8080/channel/UC5CHszV2kJxVHHCP7uJQzBg".toHttpUrl()
+        resolve("https://www.youtube.com/channel/UC5CHszV2kJxVHHCP7uJQzBg/".toHttpUrl()) shouldEqual
+            "http://localhost:8080/channel/UC5CHszV2kJxVHHCP7uJQzBg".toHttpUrl()
+    }
+
+    @Test
     fun audioUrl() {
         audioUrl(VideoID("ha")) shouldEqual "http://localhost:8080/audio?v=ha".toHttpUrl()
     }
