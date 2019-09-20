@@ -256,6 +256,14 @@ private fun HTML.renderHome(url: String?, resolved: HttpUrl?) {
 
             p { +"YouTube to podcast converter" }
 
+            div(classes = "alert alert-warning") {
+                role = "alert"
+
+                p { +"Since the launch on ProductHunt TawkTube is experiencing difficulties with it's current architecture and the YouTube API daily quota." }
+                p { +"I'm working on it, but I'm pretty incompetent and it'll take me some time to figure this out." }
+                p { +"Thank you for sticking around" }
+            }
+
             h4 { +"Usage" }
 
             p { +"Paste a link to a:" }
