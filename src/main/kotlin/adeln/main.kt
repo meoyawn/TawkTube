@@ -259,7 +259,11 @@ private fun HTML.renderHome(url: String?, resolved: HttpUrl?) {
             div(classes = "alert alert-warning") {
                 role = "alert"
 
-                p { +"Since the launch on ProductHunt TawkTube is experiencing difficulties with it's current architecture and the YouTube API daily quota." }
+                p {
+                    +"Since "
+                    a(href = "https://www.producthunt.com/posts/tawktube") { +"the launch on ProductHunt" }
+                    +" TawkTube is experiencing difficulties with it's current architecture and the YouTube API daily quota."
+                }
                 p { +"I'm working on it, but I'm pretty incompetent and it'll take me some time to figure this out." }
                 p { +"Thank you for sticking around" }
             }
