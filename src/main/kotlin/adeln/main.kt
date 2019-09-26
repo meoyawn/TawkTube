@@ -65,7 +65,7 @@ import java.time.Instant
 import java.util.concurrent.ConcurrentHashMap
 
 object Secrets {
-    const val SECRET = "AIzaSyDSYi3uLFAKXOThJ1JjZw2FkE0rdoMuYLQ"
+    const val SECRET = "AIzaSyBn4OwCJ11YiOkWqPY776O_GP9xDrA1_Iw"
 }
 
 object Config {
