@@ -64,13 +64,10 @@ import java.time.Duration
 import java.time.Instant
 import java.util.concurrent.ConcurrentHashMap
 
-object Secrets {
-    val SECRET = System.getenv("YOUTUBE_SECRET") ?: error("set your YOUTUBE_SECRET env var")
-}
-
 object Config {
     val PORT = System.getenv("PORT")?.toInt() ?: 8080
     val HOST = (System.getenv("HEROKU_URL") ?: "http://localhost:$PORT").toHttpUrl()
+    val SECRET = System.getenv("YOUTUBE_SECRET") ?: error("set your YOUTUBE_SECRET env var")
 }
 
 fun mkClient(): OkHttpClient =

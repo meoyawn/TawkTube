@@ -61,7 +61,7 @@ fun link(channel: ChannelId): HttpUrl =
 fun mkYoutube(): YouTube =
     YouTube.Builder(ApacheHttpTransport(), JacksonFactory()) {}
         .setApplicationName("TawkTube")
-        .setYouTubeRequestInitializer(YouTubeRequestInitializer(Secrets.SECRET))
+        .setYouTubeRequestInitializer(YouTubeRequestInitializer(Config.SECRET))
         .build()
 
 fun ThumbnailDetails.best(): Thumbnail? =
