@@ -65,7 +65,7 @@ import java.time.Instant
 import java.util.concurrent.ConcurrentHashMap
 
 object Secrets {
-    const val SECRET = "AIzaSyBn4OwCJ11YiOkWqPY776O_GP9xDrA1_Iw"
+    val SECRET = System.getenv("YOUTUBE_SECRET") ?: error("set your YOUTUBE_SECRET env var")
 }
 
 object Config {
