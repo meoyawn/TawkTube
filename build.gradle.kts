@@ -15,10 +15,11 @@ repositories {
 }
 
 dependencies {
-    listOf("org.jetbrains.kotlin:kotlin-stdlib-jdk8",
+    listOf(
+        "org.jetbrains.kotlin:kotlin-stdlib-jdk8",
         "org.jetbrains.kotlin:kotlin-reflect",
         "org.jetbrains.kotlinx:kotlinx-coroutines-core:1.3.4"
-    ).forEach { implementation(it) }
+    ).forEach(::implementation)
 
     implementation("com.squareup.okhttp3:okhttp:4.4.1")
 
