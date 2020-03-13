@@ -23,17 +23,19 @@ dependencies {
 
     implementation("com.squareup.okhttp3:okhttp:4.4.1")
 
-    listOf("rome", "rome-modules").forEach { implementation("com.rometools:$it:1.12.2") }
+    listOf("rome", "rome-modules").map { "com.rometools:$it:1.12.2" }
+        .forEach(::implementation)
 
     implementation("com.google.apis:google-api-services-youtube:v3-rev20180511-1.27.0")
     implementation("com.google.api-client:google-api-client-jackson2:1.27.0")
 
-    listOf("ktor-server-netty", "ktor-html-builder", "ktor-client-apache").forEach { implementation("io.ktor:$it:1.3.2") }
+    listOf("ktor-server-netty", "ktor-html-builder", "ktor-client-apache").map { "io.ktor:$it:1.3.2" }
+        .forEach(::implementation)
 
     implementation("com.yandex.android:disk-restapi-sdk:1.03")
 
-    testImplementation("org.junit.jupiter:junit-jupiter-api:5.6.0")
-    testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.6.0")
+    listOf("org.jetbrains.kotlin:kotlin-test-junit5","org.junit.jupiter:junit-jupiter-engine:5.6.0")
+        .forEach(::testImplementation)
 }
 
 version = "1.0"
