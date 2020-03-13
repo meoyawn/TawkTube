@@ -5,8 +5,9 @@ import io.ktor.application.ApplicationCall
 import io.ktor.application.call
 import io.ktor.application.install
 import io.ktor.client.HttpClient
-import io.ktor.client.call.call
 import io.ktor.client.engine.apache.Apache
+import io.ktor.client.request.request
+import io.ktor.client.statement.HttpResponse
 import io.ktor.features.AutoHeadResponse
 import io.ktor.features.Compression
 import io.ktor.features.MissingRequestParameterException
@@ -33,9 +34,9 @@ import io.ktor.util.KtorExperimentalAPI
 import io.ktor.util.StringValues
 import io.ktor.util.filter
 import io.ktor.util.toMap
+import io.ktor.utils.io.ByteWriteChannel
+import io.ktor.utils.io.copyAndClose
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.io.ByteWriteChannel
-import kotlinx.coroutines.io.copyAndClose
 import kotlinx.coroutines.withContext
 import kotlinx.html.HTML
 import kotlinx.html.InputType
@@ -67,7 +68,6 @@ import java.util.concurrent.ConcurrentHashMap
 object Config {
     val PORT = System.getenv("PORT")?.toInt() ?: 8080
     val HOST = (System.getenv("HEROKU_URL") ?: "http://localhost:$PORT").toHttpUrl()
-    val SECRET = System.getenv("YOUTUBE_SECRET") ?: error("set your YOUTUBE_SECRET env var")
 }
 
 fun mkClient(): OkHttpClient =
@@ -194,7 +194,7 @@ fun Headers.without(headers: Set<String>): StringValues =
 suspend fun ApplicationCall.proxy(client: HttpClient, url: HttpUrl) {
 
     val result =
-        client.call(url.toString()) { headers.appendAll(request.headers.without(setOf(HttpHeaders.Host))) }.response
+        client.request<HttpResponse>(url.toString()) { headers.appendAll(request.headers.without(setOf(HttpHeaders.Host))) }
 
     val resultHeaders = result.headers
 

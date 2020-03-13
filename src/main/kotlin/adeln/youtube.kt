@@ -15,6 +15,7 @@ import com.google.api.services.youtube.model.ThumbnailDetails
 import com.google.api.services.youtube.model.VideoContentDetails
 import com.google.api.services.youtube.model.VideoSnippet
 import com.rometools.rome.feed.synd.SyndEntry
+import de.fuerstenau.buildconfig.BuildConfig
 import okhttp3.HttpUrl
 import okhttp3.HttpUrl.Companion.toHttpUrl
 import java.util.Date
@@ -61,7 +62,7 @@ fun link(channel: ChannelId): HttpUrl =
 fun mkYoutube(): YouTube =
     YouTube.Builder(ApacheHttpTransport(), JacksonFactory()) {}
         .setApplicationName("TawkTube")
-        .setYouTubeRequestInitializer(YouTubeRequestInitializer(Config.SECRET))
+        .setYouTubeRequestInitializer(YouTubeRequestInitializer(BuildConfig.YOUTUBE_API_KEY))
         .build()
 
 fun ThumbnailDetails.best(): Thumbnail? =
