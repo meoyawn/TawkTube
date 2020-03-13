@@ -70,7 +70,7 @@ application {
 }
 
 buildConfig {
-    val key = property("YOUTUBE_API_KEY") as? String ?: System.getenv("YOUTUBE_API_KEY")
+    val key = properties["YOUTUBE_API_KEY"] as? String ?: System.getenv("YOUTUBE_API_KEY")
     buildConfigField("String", "YOUTUBE_API_KEY", key)
 }
 
