@@ -70,7 +70,8 @@ application {
 }
 
 buildConfig {
-    buildConfigField("String", "YOUTUBE_API_KEY", property("YOUTUBE_API_KEY") as String)
+    val key = property("YOUTUBE_API_KEY") as? String ?: System.getenv("YOUTUBE_API_KEY")
+    buildConfigField("String", "YOUTUBE_API_KEY", key)
 }
 
 kotlinPowerAssert {
