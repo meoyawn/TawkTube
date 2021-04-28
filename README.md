@@ -1,4 +1,7 @@
-TawkTube [![CircleCI](https://circleci.com/gh/adelnizamutdinov/TawkTube.svg?style=svg)](https://circleci.com/gh/adelnizamutdinov/TawkTube)
-======================================================
+# Deprecated
 
-https://listenbox.app/
+Use
+
+https://github.com/meoyawn/storagecast for Yandex.Disk
+
+https://listenbox.app/ for YouTube
